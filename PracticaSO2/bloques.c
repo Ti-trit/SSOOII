@@ -9,7 +9,7 @@ static int descriptor = 0;
 
 /**
  * Monta el dispositivo virtual, abre el fichero
- * @par camino      nombre del fichero
+ * @param camino      nombre del fichero
  * @return          devuelve -1 si ha habido error, o el descriptor si ha ido bien
 */
 int bmount(const char *camino){
@@ -18,8 +18,8 @@ int bmount(const char *camino){
 
     //Verifica si hubo un error al abrir el archivo
     if (descriptor == -1) {
-        fprintf(sdterr, RED "Error al abrir el fichero.\n");
-        return -1;
+        fprintf(stderr, RED "Error al abrir el fichero.\n");
+        return FALLO;
     }
     //Si todo va bien, retorn el descriptor del archivo
     return descriptor;
@@ -32,10 +32,10 @@ int bmount(const char *camino){
 int bumount() {
     //Si no se ha cerrado devuelve -1
     if (close(descriptor) == -1) {
-        return -1;
+        return FALLO;
     }
     //Si se ha cerrado devuelve 0
-    return 0;
+    return EXITO;
 }
 
 /**
@@ -59,30 +59,5 @@ if (nbytes<0){
     //numero de bytes escritos en el fichero
     return nbytes;
 }
+
 }
-
-/**
- * Lee 1 bloque del dispositivo virtual, correspondiente al físico nbloque.
- * @param nbloque     posición virtual del bloque
- * @param buf         buffer de memoria cuyo contenido intentaremos leer.
- * @return  nbytes, número de bytes que leemos, o FALLO(-1) si ha salta algún error. 
-*/
-int bread(unsigned int nbloque, void*buf){
-    int pos = nbloque*BLOCKSIZE;// Posición inicial.
-
-    if (Iseek(descriptor, pos, SEEK_SET)<0){
-        fprint(stderr, RED NEGRITA"Error al posicionar el puntero.\n"RESET);
-        return FALLO; // Error al posicionar el puntero.
-    }
-
-    // Lee el contenido del bloque.
-    int nbytes = read(descriptor,buf,BLOCKSIZE);
-    if(nbytes>=0){
-        return nbytes; // Devuelve nbytes == BLOCKSIZE.
-    }else{
-        fprint(stderr, RED NEGRITA"Error al leer en el bloque %i.\n"RESET, nbloque);
-        return FALLO; // Salta un error en el bloque "nbloque".
-    }
-}
-
-
