@@ -18,6 +18,7 @@ int bmount(const char *camino){
 
     //Verifica si hubo un error al abrir el archivo
     if (descriptor == -1) {
+        fprintf(sdterr, RED "Error al abrir el fichero.\n");
         return -1;
     }
     //Si todo va bien, retorn el descriptor del archivo
