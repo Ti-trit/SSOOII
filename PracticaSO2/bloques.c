@@ -38,23 +38,6 @@ int bumount() {
     return EXITO;
 }
 
-int bread(unsigned int nbloque, void*buf){
-    int pos = nbloque*BLOCKSIZE;// Posición inicial.
-
-    if (Iseek(descriptor, pos, SEEK_SET)<0){
-        fprint(stderr, RED NEGRITA"Error al posicionar el puntero.\n"RESET);
-        return FALLO; // Error al posicionar el puntero.
-    }
-
-    // Lee el contenido del bloque.
-    int nbytes = read(descriptor,buf,BLOCKSIZE);
-    if(nbytes>=0){
-        return nbytes; // Devuelve nbytes == BLOCKSIZE.
-    }else{
-        fprint(stderr, RED NEGRITA"Error al leer en el bloque %i.\n"RESET, nbloque);
-        return FALLO; // Salta un error en el bloque "nbloque".
-    }
-}
 /**
  * Escribe 1 bloque en el dispositivo virtual, en el bloque físico (nbloque).
  * @param nbloque     posición virtual del bloque
@@ -77,4 +60,28 @@ if (nbytes<0){
     return nbytes;
 }
 
+}
+
+/**
+ * Lee 1 bloque del dispositivo virtual, correspondiente al físico nbloque.
+ * @param nbloque     posición virtual del bloque
+ * @param buf         buffer de memoria cuyo contenido intentaremos leer.
+ * @return  nbytes, número de bytes que leemos, o FALLO(-1) si salta algún error. 
+*/
+int bread(unsigned int nbloque, void*buf){
+    int pos = nbloque*BLOCKSIZE;// Posición inicial.
+
+    if (Iseek(descriptor, pos, SEEK_SET)<0){
+        fprint(stderr, RED NEGRITA"Error al posicionar el puntero.\n"RESET);
+        return FALLO; // Error al posicionar el puntero.
+    }
+
+    // Lee el contenido del bloque.
+    int nbytes = read(descriptor,buf,BLOCKSIZE);
+    if(nbytes>=0){
+        return nbytes; // Devuelve nbytes == BLOCKSIZE.
+    }else{
+        fprint(stderr, RED NEGRITA"Error al leer en el bloque %i.\n"RESET, nbloque);
+        return FALLO; // Salta un error en el bloque "nbloque".
+    }
 }
