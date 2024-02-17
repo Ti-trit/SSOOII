@@ -47,7 +47,7 @@ int bumount() {
 int bwrite(unsigned int nbloque, const void *buf){
 int pos = nbloque*BLOCKSIZE;//poisicon del bloque
 
-if (lssek(descriptor, pos, SEEK_SET)<0){   //posicionar el puntero dentro del bloque
+if (lseek(descriptor, pos, SEEK_SET)<0){   //posicionar el puntero dentro del bloque
     fprintf(stderr, RED NEGRITA"Error al posicionar el puntero.\n"RESET);
 }
 //Escribir en el bloque
@@ -71,8 +71,8 @@ if (nbytes<0){
 int bread(unsigned int nbloque, void*buf){
     int pos = nbloque*BLOCKSIZE;// Posición inicial.
 
-    if (Iseek(descriptor, pos, SEEK_SET)<0){
-        fprint(stderr, RED NEGRITA"Error al posicionar el puntero.\n"RESET);
+    if (lseek(descriptor, pos, SEEK_SET)<0){
+        fprintf(stderr, RED NEGRITA"Error al posicionar el puntero.\n"RESET);
         return FALLO; // Error al posicionar el puntero.
     }
 
@@ -81,7 +81,7 @@ int bread(unsigned int nbloque, void*buf){
     if(nbytes>=0){
         return nbytes; // Devuelve nbytes == BLOCKSIZE.
     }else{
-        fprint(stderr, RED NEGRITA"Error al leer en el bloque %i.\n"RESET, nbloque);
+        fprintf(stderr, RED NEGRITA"Error al leer en el bloque %i.\n"RESET, nbloque);
         return FALLO; // Salta un error en el bloque "nbloque".
     }
 }
