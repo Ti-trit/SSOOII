@@ -13,6 +13,9 @@ static int descriptor = 0;
  * @return          devuelve -1 si ha habido error, o el descriptor si ha ido bien
 */
 int bmount(const char *camino){
+    //Configuramos la umask del proceso para no restringir ningun permiso
+    umask(000);
+    
     //Intenta abrir el archivo con permisos de lectura y escritura, creandolo si no existe
     descriptor = open(camino, O_RDWR | O_CREAT, 0666);
 
@@ -47,7 +50,7 @@ int bumount() {
 int bwrite(unsigned int nbloque, const void *buf){
 int pos = nbloque*BLOCKSIZE;//poisicon del bloque
 
-if (lssek(descriptor, pos, SEEK_SET)<0){   //posicionar el puntero dentro del bloque
+if (lseek(descriptor, pos, SEEK_SET)<0){   //posicionar el puntero dentro del bloque
     fprintf(stderr, RED NEGRITA"Error al posicionar el puntero.\n"RESET);
 }
 //Escribir en el bloque
@@ -71,8 +74,8 @@ if (nbytes<0){
 int bread(unsigned int nbloque, void*buf){
     int pos = nbloque*BLOCKSIZE;// Posición inicial.
 
-    if (Iseek(descriptor, pos, SEEK_SET)<0){
-        fprint(stderr, RED NEGRITA"Error al posicionar el puntero.\n"RESET);
+    if (lseek(descriptor, pos, SEEK_SET)<0){
+        fprintf(stderr, RED NEGRITA"Error al posicionar el puntero.\n"RESET);
         return FALLO; // Error al posicionar el puntero.
     }
 
@@ -81,7 +84,7 @@ int bread(unsigned int nbloque, void*buf){
     if(nbytes>=0){
         return nbytes; // Devuelve nbytes == BLOCKSIZE.
     }else{
-        fprint(stderr, RED NEGRITA"Error al leer en el bloque %i.\n"RESET, nbloque);
+        fprintf(stderr, RED NEGRITA"Error al leer en el bloque %i.\n"RESET, nbloque);
         return FALLO; // Salta un error en el bloque "nbloque".
     }
 }
