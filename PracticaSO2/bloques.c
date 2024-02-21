@@ -13,6 +13,9 @@ static int descriptor = 0;
  * @return          devuelve -1 si ha habido error, o el descriptor si ha ido bien
 */
 int bmount(const char *camino){
+    //Configuramos la umask del proceso para no restringir ningun permiso
+    umask(000);
+    
     //Intenta abrir el archivo con permisos de lectura y escritura, creandolo si no existe
     descriptor = open(camino, O_RDWR | O_CREAT, 0666);
 
