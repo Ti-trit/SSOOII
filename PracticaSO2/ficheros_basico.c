@@ -20,7 +20,7 @@ int initAI();
 int tamMB(unsigned int nbloques){
 
         int tambloquesMb= (nbloques/byte)/BLOCKSIZE;
-        if (nbloques/byte % BLOCKSIZE==0){
+        if ((nbloques/byte) % BLOCKSIZE==0){
             //nbloques es multiple de BLOCKSIZE
             return tambloquesMb;
         }else{
