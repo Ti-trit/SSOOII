@@ -37,13 +37,7 @@ int tamMB(unsigned int nbloques){
  * @return  0 o -1 si o no la grabación de estructura fue exitosa
 */
 //Representación de la estructura del disco virtual
-/*
-*------------------------------------------------------------------
-*  Superbloque  .
-*   SB          .
-*               .
-*------------------------------------------------------------------
-*/
+
 int initSB(unsigned int nbloques, unsigned int ninodos){
 
 
