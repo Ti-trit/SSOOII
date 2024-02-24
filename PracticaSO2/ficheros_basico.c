@@ -80,10 +80,41 @@ int initSB(unsigned int nbloques, unsigned int ninodos){
         return EXITO;
        }
 
-
-
-
 }
 
+/**
+ * Inicializa la lista de nodos libres
+ * @return   0 o -1 si la inicializacion fue exitosa o no
+*/
 
+int initAI(){
+    //Preparar buffer de inodos segun BLOCKSIZE /INODOSIZE
+    struct inodo inodos[BLOCKSIZE / INODOSIZE];
+    int contInodos = SB.posPrimerInodoLibre + 1;
+
+    //Leemos cada bloque
+    for (int i = SB.posPrimerBloqueAI; i <= SB.posUltimoBloqueAI; i++){
+        if (bread(i, inodos) == -1){
+            return FALLO
+        }
+
+        //Inicializamos cada inodo del bloque leído
+        for (int j = 0; j < BLOCKSIZE / INODOSIZE; j++){
+            inodos[j].tipo = 'l';
+            //Enlazamos con el siguiente inodo libre
+            if (contInodos < SB.totInodos){
+                inodos[j].punterosDirectos[0] = contInodos;
+                contInodos++;
+            } else {
+                inodos[j].punterosDirectos[0] = UINT_MAX
+                break
+            }
+        }
+        if (bwrite(i,inodos) == -1){
+            return FALLO;
+        }
+
+    }
+    return EXITO;
+}
 

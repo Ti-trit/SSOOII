@@ -1,5 +1,6 @@
 #include "bloques.h"
 #include <time.h>
+#include <limits.h>
 
 //Constantes
 #define posSB 0 // el superbloque se escribe en el primer bloque de nuestro FS
