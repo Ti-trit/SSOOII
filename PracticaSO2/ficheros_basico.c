@@ -31,6 +31,23 @@ int tamMB(unsigned int nbloques){
 }
 
 /**
+ * Calcula el tamaño en bloques para el array de inodos.
+ * @param   ninodos
+ * @return  tamaño de bloques para el AI.
+*/
+
+int tamAI(unsigned int ninodos){
+    int tamAI= (ninodos*INODOSIZE)/BLOCKSIZE;
+    if((ninodos*INODOSIZE)%BLOCKSIZE==0){
+        // Los inodos caben justo en los bloques.
+        return tamAI;
+    }else{
+        // Añadimos un bloque extra para los inodos restantes.
+        return tamAI + 1;
+    }
+}
+
+/**
  * Inicializa los datos del superbloque.
  * @param   nbloques   número de bloques    
  * @param   ninodos    número de inodos del sistema d ficheros
