@@ -93,11 +93,13 @@ int initSB(unsigned int nbloques, unsigned int ninodos){
 
 }
 /**
- * Inicializa lel mapa de bits.
+ * Inicializa lel mapa de bits poniendo a 1 los bits de metadatos.
  * @return
 */
 int initMB(){
+    struct superbloque SB;
     
+    char bufferMB [BLOCKSIZE];
     int metadatos = tamSB + tamMB + tamAI;
     int a = metadatos/8;
     for(int i = 0; i<a; i++){
@@ -139,8 +141,16 @@ int initMB(){
 */
 
 int initAI(){
+
+    struct superbloque SB;
     //Preparar buffer de inodos segun BLOCKSIZE /INODOSIZE
     struct inodo inodos[BLOCKSIZE / INODOSIZE];
+
+        //leer el superbloque para obtener la localizacion del AI
+        if ( bread(posSB, &SB) <0){
+            return FALLO;
+        }
+
     int contInodos = SB.posPrimerInodoLibre + 1;
 
     //Leemos cada bloque
