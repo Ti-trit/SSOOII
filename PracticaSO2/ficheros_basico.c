@@ -146,7 +146,7 @@ int initAI(){
     //Leemos cada bloque
     for (int i = SB.posPrimerBloqueAI; i <= SB.posUltimoBloqueAI; i++){
         if (bread(i, inodos) == -1){
-            return FALLO
+            return FALLO;
         }
 
         //Inicializamos cada inodo del bloque leído
@@ -157,8 +157,8 @@ int initAI(){
                 inodos[j].punterosDirectos[0] = contInodos;
                 contInodos++;
             } else {
-                inodos[j].punterosDirectos[0] = UINT_MAX
-                break
+                inodos[j].punterosDirectos[0] = UINT_MAX;
+                break;
             }
         }
         if (bwrite(i,inodos) == -1){
