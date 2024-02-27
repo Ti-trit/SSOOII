@@ -92,6 +92,46 @@ int initSB(unsigned int nbloques, unsigned int ninodos){
        }
 
 }
+/**
+ * Inicializa lel mapa de bits.
+ * @return
+*/
+int initMB(){
+    
+    int metadatos = tamSB + tamMB + tamAI;
+    int a = metadatos/8;
+    for(int i = 0; i<a; i++){
+        bufferMB[i]= 255;
+    }
+    if(metadatos%8 == 1){
+        // (10000000) = 128 en decimal.
+        bufferMB[a] = 128; 
+    }else if(metadatos%8 == 2){
+        // (11000000) = 192 en decimal.
+        bufferMB[a] = 192;
+    }else if(metadatos%8 == 3){
+        // (11100000) = 224 en decimal.
+        bufferMB[a] = 224;
+    }else if(metadatos%8 == 4){
+        // (11110000) = 240 en decimal.
+        bufferMB[a] = 240;
+    }else if(metadatos%8 == 5){
+        // (11111000) = 248 en decimal.
+        bufferMB[a] = 248;
+    }else if(metadatos%8 == 6){
+        // (11111100) = 252 en decimal.
+        bufferMB[a] = 252;
+    }else if(metadatos%8 == 7){
+        // (11111110) = 254 en decimal.
+        bufferMB[a] = 254;
+    }else{
+        bufferMB[a] = 0;
+    }
+    for(int i = a+1; i<;i++){
+        bufferMB[a] = 0;
+    }
+    return bufferMB();
+}
 
 /**
  * Inicializa la lista de nodos libres
