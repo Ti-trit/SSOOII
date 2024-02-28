@@ -1,7 +1,5 @@
 #include "ficheros_basico.h"
 
-
-//NIVEL2: 
        
         
 
