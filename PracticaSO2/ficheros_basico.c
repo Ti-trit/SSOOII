@@ -121,6 +121,7 @@ int initMB(){
     }
     //restar estos bloques de la cantidad de bloques libres
    SB.cantBloquesLibres= SB.cantBloquesLibres-metadatos;
+        return EXITO;
 }
 
 /**
