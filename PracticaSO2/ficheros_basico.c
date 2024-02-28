@@ -98,29 +98,46 @@ int initSB(unsigned int nbloques, unsigned int ninodos){
 */
 int initMB(){
     struct superbloque SB;
-
     unsigned char  bufferMB [BLOCKSIZE];
+    memset(bufferMB, 0,sizeof(bufferMB));
+
     //leer el superbloque para obtener nº de bloques y inodos
     if (bread(posSB, &SB)<1){
         return FALLO;
     }
 
-    int metadatos = tamSB + SB.totBloques+ SB.totInodos;
-    int a = metadatos/8;
-    int escribir;
-    memset(bufferMB, 0,sizeof(bufferMB));
-    //poner a 1 los bloques completos de MB
-    for(int i = 0; i<a; i++){
-       escribir = bwrite(bufferMB[i], 255);
+    int bloquesMetadatos = tamSB + tamMB(SB.totBloques)+ tamAI(SB.totInodos);
+    int bitsMetadatos = bloquesMetadatos/8;
+       for (int i = 0; i<bloquesMetadatos/8; i++){
+            bufferMB[i]=255; //rellenar con 1
+            //no caben en un bloque rellenamos el ultimo bloque manualmente
+
+      if (bloquesMetadatos%8!=0){
+           // bufferMB[(bitsMetadatos/8)]=256-(int)pow(2.0,(double)(bloquesMetadatos%8));
+                bufferMB[bitsMetadatos/8]=(256 - (1 << (bitsMetadatos%8)));
+      }
+
     }
-        //rellenar el ultimo bloque
-    escribir = bwrite(bufferMB[a], 256-(int)pow((double)2,(double)(metadatos%8)));
-        //rellenar la resta de bloques con 0 (son libres)
-    for(int i = a+1; i<SB.posPrimerBloqueDatos;i++){
-       escribir = bwrite(bufferMB[a], 0);
+
+    for(int i = SB.posPrimerBloqueMB; i<SB.posPrimerBloqueMB; i++){
+       if (bwrite(i, bufferMB)<1){
+        fprintf(stderr, "Error al rellenar el mapa de bits\n"RESET);
+        return FALLO;
+       }
+    }
+        //escribir el MB actualizado
+    if (bwrite(SB.posPrimerBloqueMB, bufferMB)<1){
+        fprintf(stderr, RED"Error al escribir el bloque %d \n"RESET, SB.posPrimerBloqueMB);
+        return FALLO;
+    }
+
+    //guardar los cambios en el superbloque
+    if (bwrite(posSB, &SB)<1){
+        fprintf(stderr, RED"Error al guardar los cambios en el SB  \n"RESET);
+        return FALLO;
     }
     //restar estos bloques de la cantidad de bloques libres
-   SB.cantBloquesLibres= SB.cantBloquesLibres-metadatos;
+   SB.cantBloquesLibres= SB.cantBloquesLibres-bloquesMetadatos;
    return EXITO;
 }
 
@@ -167,4 +184,3 @@ int initAI(){
     }
     return EXITO;
 }
-
