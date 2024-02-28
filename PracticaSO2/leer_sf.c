@@ -5,7 +5,7 @@
 int main(int argc, char **argv){
 
     if (argc!=2){
-        fprintf(stderr, RED NEGRITA"Sintaxis incorrecta :./leer_sf <nombre_dispositivo>"RESET);
+        fprintf(stderr, RED NEGRITA"Sintaxis incorrecta :./leer_sf <nombre_dispositivo>\n"RESET);
         return FALLO;
     }
     const char *nomDispositivo = argv[1];
@@ -17,7 +17,7 @@ int main(int argc, char **argv){
       }
 
       struct  superbloque SB;
-      //inicializar SB
+      //Leer el superbloque 
          if (bread(posSB, &SB) <1)
     {
         fprintf(stderr, RED"Error de lectura del superbloque.\n"RESET);
