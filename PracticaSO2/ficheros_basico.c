@@ -107,17 +107,17 @@ int initMB(){
 
     int metadatos = tamSB + SB.totBloques+ SB.totInodos;
     int a = metadatos/8;
+    int escribir;
     memset(bufferMB, 0,sizeof(bufferMB));
     //poner a 1 los bloques completos de MB
     for(int i = 0; i<a; i++){
-       bufferMB[i]= 255;
+       escribir = bwrite(bufferMB[i], 255);
     }
-
         //rellenar el ultimo bloque
-    bufferMB[a]=256-(int)pow((double)2,(double)(metadatos%8));
+    escribir = bwrite(bufferMB[a], 256-(int)pow((double)2,(double)(metadatos%8)));
         //rellenar la resta de bloques con 0 (son libres)
     for(int i = a+1; i<SB.posPrimerBloqueDatos;i++){
-        bufferMB[a] = 0;
+       escribir = bwrite(bufferMB[a], 0);
     }
     //restar estos bloques de la cantidad de bloques libres
    SB.cantBloquesLibres= SB.cantBloquesLibres-metadatos;
