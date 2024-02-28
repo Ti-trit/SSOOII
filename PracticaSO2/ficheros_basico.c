@@ -113,10 +113,10 @@ int initMB(){
        bufferMB[i]= 255;
     }
 
-    int bitsIncompletos = metadatos%8;
-        bufferMB[a]=256-pow(2,bitsIncompletos);
-
-    for(int i = a+1; i<SB.totBloques;i++){
+        //rellenar el ultimo bloque
+    bufferMB[a]=256-pow(2,metadatos%8);
+        //rellenar la resta de bloques con 0 (son libres)
+    for(int i = a+1; i<SB.posPrimerBloqueDatos;i++){
         bufferMB[a] = 0;
     }
     //restar estos bloques de la cantidad de bloques libres
