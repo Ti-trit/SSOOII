@@ -1,6 +1,5 @@
 #include "ficheros_basico.h"
 
-       
         
 
 int main(int argc, char **argv){
@@ -9,7 +8,7 @@ int main(int argc, char **argv){
         fprintf(stderr, RED NEGRITA"Sintaxis incorrecta :./leer_sf <nombre_dispositivo>"RESET);
         return FALLO;
     }
-    char nomDispositivo = argv[1];
+    const char *nomDispositivo = argv[1];
 
     //montar y desmontar el dispositivo virtual
     if (bmount(nomDispositivo)<1){
@@ -18,31 +17,37 @@ int main(int argc, char **argv){
       }
 
       struct  superbloque SB;
+      //inicializar SB
+         if (bread(posSB, &SB) <1)
+    {
+        fprintf(stderr, RED"Error de lectura del superbloque.\n"RESET);
+        return FALLO;
+    }
       struct inodo inodo;
       
 
     //mostrar los campos del superbloque
     printf("DATOS DEL SUPERBLOQUE\n.");
-    printf("posPrimerBloqueMB = %i\n",SB.posPrimerBloqueMB);
-    printf("posUltimoBloqueMB = %i\n", SB.posUltimoBloqueMB);
+    printf("posPrimerBloqueMB = %d\n",SB.posPrimerBloqueMB);
+    printf("posUltimoBloqueMB = %d\n", SB.posUltimoBloqueMB);
 
-    printf("posPrimerBloqueAI = %i\n",SB.posPrimerBloqueAI);
-    printf("posUltimoBloqueAI = %i\n", SB.posUltimoBloqueAI);
+    printf("posPrimerBloqueAI = %d\n",SB.posPrimerBloqueAI);
+    printf("posUltimoBloqueAI = %d\n", SB.posUltimoBloqueAI);
 
-    printf("posPrimerBloqueDatos = %i\n",SB.posPrimerBloqueDatos);
-    printf("posUltimoBloqueDatos = %i\n", SB.posUltimoBloqueDatos);
+    printf("posPrimerBloqueDatos = %d\n",SB.posPrimerBloqueDatos);
+    printf("posUltimoBloqueDatos = %d\n", SB.posUltimoBloqueDatos);
 
-    printf("posInodoRaiz = %i\n",SB.posInodoRaiz);
-    printf("posPrimerInodoLibre = %i\n",SB.posPrimerInodoLibre);
+    printf("posInodoRaiz = %d\n",SB.posInodoRaiz);
+    printf("posPrimerInodoLibre = %d\n",SB.posPrimerInodoLibre);
 
     printf("cantBloquesLibres = %i\n",SB.cantBloquesLibres);
 
     printf("cantInodosLibres  = %i\n",SB.cantInodosLibres);
-    printf("totBloques  = %i\n",SB.totBloques);
-    printf("totInodos  = %i\n",SB.totInodos);
+    printf("totBloques  = %d\n",SB.totBloques);
+    printf("totInodos  = %d\n",SB.totInodos);
     //mostrar el tamaño de SB y inodo 
-    printf("\nsizeof struct superbloque: %i\n", sizeof(SB));
-    printf("sizeof struct inodo: %i", sizeof(inodo));
+    printf("\nsizeof struct superbloque: %ld\n", sizeof(SB));
+    printf("sizeof struct inodo: %ld", sizeof(inodo));
 
     //recorrido de la lista de inodos libres
     printf("RECORRIDO LISTA ENLAZADA DE INODOS LIBRES\n");
@@ -61,7 +66,7 @@ int main(int argc, char **argv){
         //si el inodo es libre
         if (inodos[j].tipo=='l'){
             conInodos++;
-            print("%d", conInodos);
+            printf("%d", conInodos);
         //hemos recorrido todos los inodos
         }else if (conInodos==SB.totInodos){
               printf("-1 \n");  
