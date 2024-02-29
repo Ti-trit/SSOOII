@@ -64,13 +64,17 @@ int main(int argc, char **argv){
         //si el inodo es libre
         if (inodos[j].tipo=='l'){
             conInodos++;
-        //    printf("%d ", conInodos);
-        //hemos recorrido todos los inodos
-        }else if (conInodos==SB.totInodos){
+            if (conInodos<28 || (conInodos<SB.totInodos && conInodos>24980)){
+            printf("%d ", conInodos);
+            } else if (conInodos==29){
+              printf("... ");
+            }else if (conInodos==SB.totInodos){
               printf("-1 \n");  
         }
-       }
+       
 
+    }
+    }
     }
 
 
