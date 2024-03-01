@@ -2,12 +2,6 @@
 
 #define byte 8
 #define posLibre   0
-//Metodos
-int tamMB(unsigned int nbloques);
-int tamAI(unsigned int ninodos);
-int initSB(unsigned int nbloques, unsigned int ninodos);
-int initMB(); 
-int initAI();
 
 
 
@@ -264,7 +258,7 @@ int reservar_bloque(){
 
 
     }else{//No hay bloques libres
-        fprintf(stderr, RED"No hay bloques liberar!\n"RESET);
+        fprintf(stderr, RED"No hay bloques libres.!\n"RESET);
         return FALLO;
     }
     
