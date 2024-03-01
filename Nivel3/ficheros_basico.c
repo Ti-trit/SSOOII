@@ -266,3 +266,108 @@ int reservar_bloque(){
 
 }
 
+/**
+ * Lee ninodo del AI para volcarlo en inodo 
+ * @param ninodo    posición del inodo en el array de inodos
+ * @param inodo     el inodo a leer del array de inodos
+ * @return  EXITO si todo ha ido bien. FALLO en caso contrario
+ * 
+*/
+
+int leer_inodo(unsigned int ninodo, struct inodo *inodo){
+    //leemos el SB para localizar el AI
+    struct superbloque SB;
+    if (bread(posLibre, &SB)==FALLO){
+       fprintf(stderr, RED "Error al leer el superbloque\n"RESET);
+            return FALLO;
+    }
+    //obtener el nº de bloque de AI que contiene ninodo
+    int nInodosPorBloque = BLOCKSIZE/INODOSIZE;
+    int posBloque = ninodo/nInodosPorBloque;
+    //posición absoluta del inodo
+    int posInodo = ninodo %(nInodosPorBloque);
+    struct inodo inodos [nInodosPorBloque];
+    if (bread(posBloque, inodos)<0){
+        fprintf(stderr, RED"Error al leer el inodo\n" RESET);
+        return FALLO;
+    }
+    //guardar el contenido en el inodo
+    *inodo = inodos[ninodo%nInodosPorBloque];
+
+
+
+
+    return EXITO;
+}
+/**
+ * Reserva el primer inodo libre que encuentra
+ * 
+ * @param tipo  tipo de inodo
+ * @param permisos  los permisos a asignar al inodo que reservaremos
+ * @return posInodoReservado o FALLO si la reserva del inodo ha fallado.
+*/
+
+int reservar_inodo(unsigned char tipo, unsigned char permisos){
+
+int posInodoReservado = -1;
+
+struct superbloque SB; 
+//leemos el superbloque
+if (bread(posLibre, &SB)==FALLO){
+  fprintf(stderr, RED "Error al leer el superbloque\n"RESET);
+            return FALLO;
+    }
+
+    if (SB.cantInodosLibres==0){
+          fprintf(stderr, RED "No hay inodos libres para reservar\n"RESET);
+            return FALLO;
+    }else{
+        posInodoReservado=SB.posPrimerInodoLibre;
+        //actualizar la lista de inodos libres
+        //dado que los inodos libres son en posiciones contiguas el siguiente inodo
+        //libre está en SB.posPrimerInodoLibre+1
+        SB.posPrimerInodoLibre++;
+        //inicializamos los campos de inodo reservado
+        struct inodo inodoReservado;
+        inodoReservado.tipo=tipo;
+        inodoReservado.permisos=permisos;
+        inodoReservado.nlinks=1;
+        inodoReservado.tamEnBytesLog=0;
+        inodoReservado.numBloquesOcupados=0;
+        inodoReservado.ctime=time(NULL);
+        inodoReservado.atime=time(NULL);
+        inodoReservado.mtime=time(NULL);
+                for (int i = 0; i<12; i++){
+                    if (i<3){
+                        inodoReservado.punterosDirectos[i]=0;
+                    }
+                    inodoReservado.punterosIndirectos[i]=0;
+                }
+   
+
+
+        //escribir el inodo
+        if (escribir_inodo(posInodoReservado, &inodoReservado)<0){
+            fprintf(stderr, RESET"Error al escribir el inodo\n"RESET);
+            return FALLO;
+        }
+        //decrementar la cantidad de inodos libres
+        SB.cantInodosLibres--;
+        //reescribir el SB para guardar los cambios realizados
+        if (bwrite(posSB, &SB)<0){
+        fprintf(stderr, RED"Error al guardar los cambios en el SB  \n"RESET);
+        return FALLO;
+    }
+
+        return posInodoReservado;
+    }
+
+
+
+
+
+}
+
+
+
+
