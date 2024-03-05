@@ -190,6 +190,53 @@ int initAI(){
 }
 
 /**
+ * Escribe un 0(libre) o 1(ocupado) en el bloque 
+ * que se pasa por parámetro.
+ * @param   nbloque bit del MB a modificar.
+ * @param   bit valor a escribir.
+ * @return  0 o -1 si la inicializacion fue exitosa o no.
+*/
+
+int escribir_bit(unsigned int nbloque, unsigned int bit){
+    struct superbloque SB;
+    int posbyte = nbloque/8;
+    int posbit = nbloque%8;
+    if (bread(nbloque, &SB)==FALLO){
+        fprintf(stderr, RED "Error al leer el bloque\n"RESET);
+        return FALLO;
+    }
+    
+    int nbloqueMB = posbyte/BLOCKSIZE;
+    int nbloqueabs = SB.posPrimerBloqueMB + nbloqueMB;
+    unsigned char bufferMB[BLOCKSIZE];
+
+    if (bread(nbloque, &bufferMB)==FALLO){
+        fprintf(stderr, RED "Error al leer el bloque\n"RESET);
+        return FALLO;
+    }
+
+    posbyte = posbyte % BLOCKSIZE;
+
+    unsigned char mascara = 128; //10000000
+    mascara >>= posbit;
+
+    if(bit == 1){
+        bufferMB[posbyte]|= mascara; // Poner el byte a 1.
+    }else if(bit == 0){
+        bufferMB[posbyte]&= ~mascara; // Poner el byte a 0.
+    }else{
+        fprintf(stderr, RED "Error, el bit a escribir debe ser 0 o 1\n"RESET);
+        return FALLO;
+    }
+
+    if (bwrite(buffer[posbyte], &SB)<0){
+        fprintf(stderr, RED"Error al guardar los cambios en el SB  \n"RESET);
+        return FALLO;
+    }
+    return EXITO;
+}
+
+/**
  * Reserva el primer bloque libre que encuentra
  * @return nº del bloque reservado o FALLO si no se pudo reservar un bloque
 */
