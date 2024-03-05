@@ -189,8 +189,9 @@ int initAI(){
     return EXITO;
 }
 
+
 /**
- * Escribe un 0(libre) o 1(ocupado) en el bloque 
+ * Escribe un 0(libre) o 1(ocupado) en el bloque físico
  * que se pasa por parámetro.
  * @param   nbloque bit del MB a modificar.
  * @param   bit valor a escribir.
@@ -201,24 +202,27 @@ int escribir_bit(unsigned int nbloque, unsigned int bit){
     struct superbloque SB;
     int posbyte = nbloque/8;
     int posbit = nbloque%8;
+    
+    //leemos el superbloque para obtenir la posición del MB
     if (bread(nbloque, &SB)==FALLO){
         fprintf(stderr, RED "Error al leer el bloque\n"RESET);
         return FALLO;
     }
-    
+    //posicion del bloque que contiye ell byte
     int nbloqueMB = posbyte/BLOCKSIZE;
+    //posición absoluta del bloque que buscamos
     int nbloqueabs = SB.posPrimerBloqueMB + nbloqueMB;
     unsigned char bufferMB[BLOCKSIZE];
 
-    if (bread(nbloque, &bufferMB)==FALLO){
+    if (bread(nbloqueabs, bufferMB)==FALLO){
         fprintf(stderr, RED "Error al leer el bloque\n"RESET);
         return FALLO;
     }
-
+    //obtener la posición de este byte dentro del bufferMB
     posbyte = posbyte % BLOCKSIZE;
 
     unsigned char mascara = 128; //10000000
-    mascara >>= posbit;
+    mascara >>= posbit; //desplazamiento de bits a la derecha
 
     if(bit == 1){
         bufferMB[posbyte]|= mascara; // Poner el byte a 1.
@@ -229,13 +233,12 @@ int escribir_bit(unsigned int nbloque, unsigned int bit){
         return FALLO;
     }
 
-    if (bwrite(buffer[posbyte], &SB)<0){
+    if (bwrite(nbloqueabs, &SB)<0){
         fprintf(stderr, RED"Error al guardar los cambios en el SB  \n"RESET);
         return FALLO;
     }
     return EXITO;
 }
-
 /**
  * Reserva el primer bloque libre que encuentra
  * @return nº del bloque reservado o FALLO si no se pudo reservar un bloque
