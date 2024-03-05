@@ -208,7 +208,7 @@ int escribir_bit(unsigned int nbloque, unsigned int bit){
         fprintf(stderr, RED "Error al leer el bloque\n"RESET);
         return FALLO;
     }
-    //posicion del bloque que contiye ell byte
+    //posicion del bloque que contiene el byte
     int nbloqueMB = posbyte/BLOCKSIZE;
     //posición absoluta del bloque que buscamos
     int nbloqueabs = SB.posPrimerBloqueMB + nbloqueMB;
@@ -239,6 +239,46 @@ int escribir_bit(unsigned int nbloque, unsigned int bit){
     }
     return EXITO;
 }
+
+/**
+ * Escribe un 0(libre) o 1(ocupado) en el bloque 
+ * que se pasa por parámetro.
+ * @param   nbloque bit del MB a leer.
+ * @return  Devuelve el valor del nbloque en el MB.
+*/
+
+char leer_bit(unsigned int nbloque){
+    struct superbloque SB;
+    int posbyte = nbloque/8;
+    int posbit = nbloque%8;
+    
+    //leemos el superbloque para obtenir la posición del MB
+    if (bread(nbloque, &SB)==FALLO){
+        fprintf(stderr, RED "Error al leer el bloque\n"RESET);
+        return FALLO;
+    }
+    //posicion del bloque que contiene el byte
+    int nbloqueMB = posbyte/BLOCKSIZE;
+    //posición absoluta del bloque que buscamos
+    int nbloqueabs = SB.posPrimerBloqueMB + nbloqueMB;
+    unsigned char bufferMB[BLOCKSIZE];
+
+    if (bread(nbloqueabs, bufferMB)==FALLO){
+        fprintf(stderr, RED "Error al leer el bloque\n"RESET);
+        return FALLO;
+    }
+    //obtener la posición de este byte dentro del bufferMB
+    posbyte = posbyte % BLOCKSIZE;
+
+    unsigned char mascara = 128; // 10000000
+    mascara>>= posbit; // Desplazamiento del bit "posbit" veces
+                       // a la derecha.
+    mascara&=bufferMB[posbyte]; // operador AND
+    mascara>>=(7-posbit); //desplazamos el bit al extremo derecho.
+
+    return mascara;
+}
+
 /**
  * Reserva el primer bloque libre que encuentra
  * @return nº del bloque reservado o FALLO si no se pudo reservar un bloque
