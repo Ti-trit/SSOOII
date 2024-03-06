@@ -189,6 +189,96 @@ int initAI(){
     return EXITO;
 }
 
+
+/**
+ * Escribe un 0(libre) o 1(ocupado) en el bloque físico
+ * que se pasa por parámetro.
+ * @param   nbloque bit del MB a modificar.
+ * @param   bit valor a escribir.
+ * @return  0 o -1 si la inicializacion fue exitosa o no.
+*/
+
+int escribir_bit(unsigned int nbloque, unsigned int bit){
+    struct superbloque SB;
+    int posbyte = nbloque/8;
+    int posbit = nbloque%8;
+    
+    //leemos el superbloque para obtenir la posición del MB
+    if (bread(nbloque, &SB)==FALLO){
+        fprintf(stderr, RED "Error al leer el bloque\n"RESET);
+        return FALLO;
+    }
+    //posicion del bloque que contiene el byte
+    int nbloqueMB = posbyte/BLOCKSIZE;
+    //posición absoluta del bloque que buscamos
+    int nbloqueabs = SB.posPrimerBloqueMB + nbloqueMB;
+    unsigned char bufferMB[BLOCKSIZE];
+
+    if (bread(nbloqueabs, bufferMB)==FALLO){
+        fprintf(stderr, RED "Error al leer el bloque\n"RESET);
+        return FALLO;
+    }
+    //obtener la posición de este byte dentro del bufferMB
+    posbyte = posbyte % BLOCKSIZE;
+
+    unsigned char mascara = 128; //10000000
+    mascara >>= posbit; //desplazamiento de bits a la derecha
+
+    if(bit == 1){
+        bufferMB[posbyte]|= mascara; // Poner el byte a 1.
+    }else if(bit == 0){
+        bufferMB[posbyte]&= ~mascara; // Poner el byte a 0.
+    }else{
+        fprintf(stderr, RED "Error, el bit a escribir debe ser 0 o 1\n"RESET);
+        return FALLO;
+    }
+
+    if (bwrite(nbloqueabs, &SB)<0){
+        fprintf(stderr, RED"Error al guardar los cambios en el SB  \n"RESET);
+        return FALLO;
+    }
+    return EXITO;
+}
+
+/**
+ * Escribe un 0(libre) o 1(ocupado) en el bloque 
+ * que se pasa por parámetro.
+ * @param   nbloque bit del MB a leer.
+ * @return  Devuelve el valor del nbloque en el MB.
+*/
+
+char leer_bit(unsigned int nbloque){
+    struct superbloque SB;
+    int posbyte = nbloque/8;
+    int posbit = nbloque%8;
+    
+    //leemos el superbloque para obtenir la posición del MB
+    if (bread(nbloque, &SB)==FALLO){
+        fprintf(stderr, RED "Error al leer el bloque\n"RESET);
+        return FALLO;
+    }
+    //posicion del bloque que contiene el byte
+    int nbloqueMB = posbyte/BLOCKSIZE;
+    //posición absoluta del bloque que buscamos
+    int nbloqueabs = SB.posPrimerBloqueMB + nbloqueMB;
+    unsigned char bufferMB[BLOCKSIZE];
+
+    if (bread(nbloqueabs, bufferMB)==FALLO){
+        fprintf(stderr, RED "Error al leer el bloque\n"RESET);
+        return FALLO;
+    }
+    //obtener la posición de este byte dentro del bufferMB
+    posbyte = posbyte % BLOCKSIZE;
+
+    unsigned char mascara = 128; // 10000000
+    mascara>>= posbit; // Desplazamiento del bit "posbit" veces
+                       // a la derecha.
+    mascara&=bufferMB[posbyte]; // operador AND
+    mascara>>=(7-posbit); //desplazamos el bit al extremo derecho.
+
+    return mascara;
+}
+
 /**
  * Reserva el primer bloque libre que encuentra
  * @return nº del bloque reservado o FALLO si no se pudo reservar un bloque
@@ -286,6 +376,42 @@ int liberar_bloque(unsigned int nbloque){
 }
 
 /**
+ * Escribir ninodo del AI para volcarlo en inodo 
+ * @param ninodo    posición del inodo en el array de inodos
+ * @param inodo     el inodo a leer del array de inodos
+ * @return  EXITO si todo ha ido bien. FALLO en caso contrario
+ * 
+*/
+int escribir_inodo(unsigned int ninodo,struct inodo *inodo){
+    struct superbloque SB;
+    //leer el superbloque
+    if (bread(posLibre, &SB)==FALLO){
+       fprintf(stderr, RED "Error al leer el superbloque\n"RESET);
+            return FALLO;
+    }
+
+    //obtener el nº de bloque de AI que contiene ninodo
+    int nInodosPorBloque = BLOCKSIZE/INODOSIZE;
+
+    int nbloqueAI = ninodo/nInodosPorBloque;
+    int nbloqueabs = nbloqueAI+SB.posPrimerBloqueAI;
+    struct inodo inodos[BLOCKSIZE/INODOSIZE];
+    if(bread(nbloqueabs,inodos)<0){
+        fprintf(stderr, RED "Error al leer el inodo\n"RESET);
+            return FALLO;
+    }
+    //posición absoluta del inodo
+
+    int posInodo = ninodo %(nInodosPorBloque);
+    inodo[posInodo]=*inodo;
+    if(bwrite(nbloqueabs,inodos)<0){
+        fprintf(stderr, RED"Error al guardar los cambios en el SB  \n"RESET);
+        return FALLO;
+    }
+    return EXITO;
+}
+
+/**
  * Lee ninodo del AI para volcarlo en inodo 
  * @param ninodo    posición del inodo en el array de inodos
  * @param inodo     el inodo a leer del array de inodos
@@ -302,11 +428,12 @@ int leer_inodo(unsigned int ninodo, struct inodo *inodo){
     }
     //obtener el nº de bloque de AI que contiene ninodo
     int nInodosPorBloque = BLOCKSIZE/INODOSIZE;
-    int posBloque = ninodo/nInodosPorBloque;
+    int nbloqueAI = ninodo/nInodosPorBloque;
     //posición absoluta del inodo
-    int posInodo = ninodo %(nInodosPorBloque);
+    int nbloqueabs = nbloqueAI+SB.posPrimerBloqueAI;
+    
     struct inodo inodos [nInodosPorBloque];
-    if (bread(posBloque, inodos)<0){
+    if (bread(nbloqueabs, inodos)<0){
         fprintf(stderr, RED"Error al leer el inodo\n" RESET);
         return FALLO;
     }
