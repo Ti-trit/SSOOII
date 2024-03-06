@@ -225,7 +225,7 @@ int reservar_bloque(){
         //localimos de cúal byte se trata
         int posbyte=0;
         for (int i = posbyte; i<BLOCKSIZE; i++){
-            if (bufferAux[i]!=255){
+            if (bufferMB[i]!=255){
                 posbyte=i;
                 break;
             }
@@ -261,9 +261,28 @@ int reservar_bloque(){
         fprintf(stderr, RED"No hay bloques libres.!\n"RESET);
         return FALLO;
     }
-    
+}
 
+/**
+ * Libera un bloque determinado con la ayuda de escribir_bit()
+ * @param nbloque   bloque a liberar
+ * @return nbloque o FALLO si no ha ido bien
+*/
 
+int liberar_bloque(unsigned int nbloque){
+    struct superbloque SB;
+    if (bread(posLibre, &SB)==FALLO){
+        fprintf(stderr, RED "Error al leer el superbloque\n"RESET);
+        return FALLO;
+    }
+    //Escribimos el bit a 0 para indicar que esta libre
+    if (escribir_bit(nbloque, 0)<0){
+        fprintf(stderr, RED "Error al escribir 0 para liberar el bloque\n"RESET);
+        return FALLO;
+    }
+
+    SB.cantBloquesLibres += 1;
+    return nbloque;
 }
 
 /**
