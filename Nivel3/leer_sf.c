@@ -48,7 +48,28 @@ int main(int argc, char **argv){
     printf("sizeof struct inodo: %ld\n", sizeof(struct inodo));
 
     //recorrido de la lista de inodos libres
-    printf("RECORRIDO LISTA ENLAZADA DE INODOS LIBRES\n");
+    printf("RESERVAMOS UN BLOQUE Y LUEGO LO LIBERAMOS\n");
+    int bloque_reservado=reservar_bloque();
+    if (bloque_reservado < 0){
+      fprintf(stderr, RED"Error al reservar un bloque\n"RESET);
+      return FALLO;
+    } else {
+      printf("Se ha reservado el bloque físico %d que era el 1º libre indicado por el MB",bloque_reservado);
+    }
+    if (bread(posSB, &SB)<0){
+      fprintf(stderr, RED"Error de lectura del superbloque.\n"RESET);
+      return FALLO;
+    }
+
+    printf("SB.cantBloquesLibres= %i\n",SB.cantBloquesLibres);
+
+    if (liberar_bloque(bloque_reservado)) {
+      fprintf(stderr, RED"Error al liberar un bloque\n"RESET);
+      return FALLO;
+    }
+    
+    printf("Liberamos ese bloque y después SB.cantBloquesLibres= %i\n",SB.cantBloquesLibres);
+
     struct inodo inodos [BLOCKSIZE/INODOSIZE];
    int conInodos = 0;
 

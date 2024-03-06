@@ -59,14 +59,17 @@ int nbloques = atoi(argv[2]);
     return FALLO;
   }
 
+  //Creamos el directorio raiz
+  if (reservar_inodo('d', 7) < 0){
+    fprintf(stderr, RED"Error al reservar inodo\n"RESET);
+    return FALLO;
+  }
+
   //desmontar el dispositivo virtual
   if (bumount(camino)<0){
 
     fprintf(stderr, RED"Error al desmontar el dispositivo.\n" RESET);
     return FALLO;
   }
-
-    
-
 
 }
