@@ -362,23 +362,26 @@ int reservar_bloque(){
 */
 int escribir_inodo(unsigned int ninodo,struct inodo *inodo){
     struct superbloque SB;
-
+    //leer el superbloque
     if (bread(posLibre, &SB)==FALLO){
        fprintf(stderr, RED "Error al leer el superbloque\n"RESET);
             return FALLO;
     }
 
     //obtener el nº de bloque de AI que contiene ninodo
-    int nbloqueAI = (ninodo*128)/BLOCKSIZE;
-    int nbloqueabs = nbloqueAI+14;
+    int nInodosPorBloque = BLOCKSIZE/INODOSIZE;
+
+    int nbloqueAI = ninodo/nInodosPorBloque;
+    int nbloqueabs = nbloqueAI+SB.posPrimerBloqueAI;
     struct inodo inodos[BLOCKSIZE/INODOSIZE];
     if(bread(nbloqueabs,inodos)<0){
         fprintf(stderr, RED "Error al leer el inodo\n"RESET);
             return FALLO;
     }
     //posición absoluta del inodo
+
     int posInodo = ninodo %(nInodosPorBloque);
-    inodo[posinodo]=*inodo;
+    inodo[posInodo]=*inodo;
     if(bwrite(nbloqueabs,inodos)<0){
         fprintf(stderr, RED"Error al guardar los cambios en el SB  \n"RESET);
         return FALLO;
@@ -403,11 +406,12 @@ int leer_inodo(unsigned int ninodo, struct inodo *inodo){
     }
     //obtener el nº de bloque de AI que contiene ninodo
     int nInodosPorBloque = BLOCKSIZE/INODOSIZE;
-    int posBloque = ninodo/nInodosPorBloque;
+    int nbloqueAI = ninodo/nInodosPorBloque;
     //posición absoluta del inodo
-    int posInodo = ninodo %(nInodosPorBloque);
+    int nbloqueabs = nbloqueAI+SB.posPrimerBloqueAI;
+    
     struct inodo inodos [nInodosPorBloque];
-    if (bread(posBloque, inodos)<0){
+    if (bread(nbloqueabs, inodos)<0){
         fprintf(stderr, RED"Error al leer el inodo\n" RESET);
         return FALLO;
     }
