@@ -351,9 +351,39 @@ int reservar_bloque(){
         fprintf(stderr, RED"No hay bloques libres.!\n"RESET);
         return FALLO;
     }
-    
+}
 
+/**
+ * Escribir ninodo del AI para volcarlo en inodo 
+ * @param ninodo    posición del inodo en el array de inodos
+ * @param inodo     el inodo a leer del array de inodos
+ * @return  EXITO si todo ha ido bien. FALLO en caso contrario
+ * 
+*/
+int escribir_inodo(unsigned int ninodo,struct inodo *inodo){
+    struct superbloque SB;
 
+    if (bread(posLibre, &SB)==FALLO){
+       fprintf(stderr, RED "Error al leer el superbloque\n"RESET);
+            return FALLO;
+    }
+
+    //obtener el nº de bloque de AI que contiene ninodo
+    int nbloqueAI = (ninodo*128)/BLOCKSIZE;
+    int nbloqueabs = nbloqueAI+14;
+    struct inodo inodos[BLOCKSIZE/INODOSIZE];
+    if(bread(nbloqueabs,inodos)<0){
+        fprintf(stderr, RED "Error al leer el inodo\n"RESET);
+            return FALLO;
+    }
+    //posición absoluta del inodo
+    int posInodo = ninodo %(nInodosPorBloque);
+    inodo[posinodo]=*inodo;
+    if(bwrite(nbloqueabs,inodos)<0){
+        fprintf(stderr, RED"Error al guardar los cambios en el SB  \n"RESET);
+        return FALLO;
+    }
+    return EXITO;
 }
 
 /**
