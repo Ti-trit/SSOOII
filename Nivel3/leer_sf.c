@@ -49,9 +49,9 @@ int main(int argc, char **argv){
 
     //recorrido de la lista de inodos libres
     printf("RESERVAMOS UN BLOQUE Y LUEGO LO LIBERAMOS\n");
-    bloque_reservado=reservar_bloque()
+    int bloque_reservado=reservar_bloque();
     if (bloque_reservado < 0){
-      fprintf(stderr, RED"Error al reservar un bloque\n"RESET)
+      fprintf(stderr, RED"Error al reservar un bloque\n"RESET);
       return FALLO;
     } else {
       printf("Se ha reservado el bloque físico %d que era el 1º libre indicado por el MB",bloque_reservado);
@@ -61,15 +61,15 @@ int main(int argc, char **argv){
       return FALLO;
     }
 
-    printf("SB.cantBloquesLibres= %i\n"SB.cantBloquesLibres);
+    printf("SB.cantBloquesLibres= %i\n",SB.cantBloquesLibres);
 
     if (liberar_bloque(bloque_reservado)) {
-      fprintf(stderr, RED"Error al liberar un bloque\n"RESET)
+      fprintf(stderr, RED"Error al liberar un bloque\n"RESET);
       return FALLO;
     }
     
-    printf("Liberamos ese bloque y después SB.cantBloquesLibres= %i\n"SB.cantBloquesLibres);
-    
+    printf("Liberamos ese bloque y después SB.cantBloquesLibres= %i\n",SB.cantBloquesLibres);
+
     struct inodo inodos [BLOCKSIZE/INODOSIZE];
    int conInodos = 0;
 
