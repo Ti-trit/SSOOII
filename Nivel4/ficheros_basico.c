@@ -519,6 +519,46 @@ if (bread(posLibre, &SB)==FALLO){
 
 
 
+/**
+ * Calcula el índice del bloque de punteros.
+ * 
+ * @param nblogico, bloque lógico.
+ * @param nivel_punteros, nivel del que cuelgan el bloque de punteros.
+ * @return el índice del bloque de punteros o FALLO si los parámetros son incorrectos.
+*/
+
+int obtener_indice(unsigned int nblogico, int nivel_punteros){
+
+    if(nblogico<DIRECTOS){ //Dentro de los bloques directos.
+        return nblogico;
+    }else if(DIRECTOS<=nblogico<INDIRECTOS0){ //Dentro de los bloques indirectos 0.
+        return nblogico-DIRECTOS;
+    }else if(INDIRECTOS0<=nblogico<INDIRECTOS1){ //Dentro de los bloques indirectos 1.
+        if(nivel_punteros=2){
+            return (nblogico-INDIRECTOS0)/NPUNTEROS;
+        }else if(nivel_punteros=1){
+            return (nblogico-INDIRECTOS0)%NPUNTEROS;
+        }else{
+            fprintf(stderr, RED"Error, el nivel del puntero no es correcto.  \n"RESET);
+            return FALLO;
+        }
+    }else if(INDIRECTOS1<=nblogico<INDIRECTOS2){ //Dentro de los bloques indirectos 2.
+            if(nivel_punteros=3){
+                return (nblogico-INDIRECTOS1)/(NPUNTEROS*NPUNTEROS);
+            }else if(nivel_punteros=2){
+                return ((nblogico-INDIRECTOS1)%(NPUNTEROS*NPUNTEROS))/NPUNTEROS;
+            }else if(nivel_punteros=1){
+                return ((nblogico-INDIRECTOS1)%(NPUNTEROS*NPUNTEROS))%NPUNTEROS;
+            }else{
+                fprintf(stderr, RED"Error, el nivel del puntero no es correcto.  \n"RESET);
+                return FALLO;
+            }
+    }else{
+        fprintf(stderr, RED"Error, El puntero no está dentro del rango máximo.  \n"RESET);
+        return FALLO;
+    }
+}
+
 
 
 }
