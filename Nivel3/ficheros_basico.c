@@ -343,6 +343,11 @@ int reservar_bloque(){
             fprintf(stderr, RED"Error al limpiar el bloque reservado en al zona de datos\n"RESET);
             return FALLO;
         }
+            
+             if (bwrite(posSB, &SB)<0){
+        fprintf(stderr, RED"Error al guardar los cambios en el SB  \n"RESET);
+        return FALLO;
+    }
         //devolver el nª del bloque reservado
         return nbloque;
 
