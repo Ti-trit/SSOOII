@@ -464,63 +464,95 @@ int leer_inodo(unsigned int ninodo, struct inodo *inodo){
 
 int reservar_inodo(unsigned char tipo, unsigned char permisos){
 
-int posInodoReservado = -1;
+        int posInodoReservado = -1;
 
-struct superbloque SB; 
-//leemos el superbloque
-if (bread(posLibre, &SB)==FALLO){
-  fprintf(stderr, RED "Error al leer el superbloque\n"RESET);
-            return FALLO;
-    }
+        struct superbloque SB; 
+        //leemos el superbloque
+        if (bread(posLibre, &SB)==FALLO){
+                fprintf(stderr, RED "Error al leer el superbloque\n"RESET);
+                return FALLO;
+        }
 
-    if (SB.cantInodosLibres==0){
-          fprintf(stderr, RED "No hay inodos libres para reservar\n"RESET);
-            return FALLO;
-    }else{
-        posInodoReservado=SB.posPrimerInodoLibre;
-        //actualizar la lista de inodos libres
-        //dado que los inodos libres son en posiciones contiguas el siguiente inodo
-        //libre está en SB.posPrimerInodoLibre+1
-        SB.posPrimerInodoLibre++;
-        //inicializamos los campos de inodo reservado
-        struct inodo inodoReservado;
-        inodoReservado.tipo=tipo;
-        inodoReservado.permisos=permisos;
-        inodoReservado.nlinks=1;
-        inodoReservado.tamEnBytesLog=0;
-        inodoReservado.numBloquesOcupados=0;
-        inodoReservado.ctime=time(NULL);
-        inodoReservado.atime=time(NULL);
-        inodoReservado.mtime=time(NULL);
+        if (SB.cantInodosLibres==0){
+                fprintf(stderr, RED "No hay inodos libres para reservar\n"RESET);
+                return FALLO;
+        }else{
+                posInodoReservado=SB.posPrimerInodoLibre;
+                //actualizar la lista de inodos libres
+                //dado que los inodos libres son en posiciones contiguas el siguiente inodo
+                //libre está en SB.posPrimerInodoLibre+1
+                SB.posPrimerInodoLibre++;
+                //inicializamos los campos de inodo reservado
+                struct inodo inodoReservado;
+                inodoReservado.tipo=tipo;
+                inodoReservado.permisos=permisos;
+                inodoReservado.nlinks=1;
+                inodoReservado.tamEnBytesLog=0;
+                inodoReservado.numBloquesOcupados=0;
+                inodoReservado.ctime=time(NULL);
+                inodoReservado.atime=time(NULL);
+                inodoReservado.mtime=time(NULL);
                 for (int i = 0; i<12; i++){
                     if (i<3){
                         inodoReservado.punterosDirectos[i]=0;
                     }
                     inodoReservado.punterosIndirectos[i]=0;
                 }
-   
+            
+                //escribir el inodo
+                if (escribir_inodo(posInodoReservado, &inodoReservado)<0){
+                        fprintf(stderr, RESET"Error al escribir el inodo\n"RESET);
+                        return FALLO;
+                }
+                //decrementar la cantidad de inodos libres
+                SB.cantInodosLibres--;
+                //reescribir el SB para guardar los cambios realizados
+                if (bwrite(posSB, &SB)<0){
+                        fprintf(stderr, RED"Error al guardar los cambios en el SB  \n"RESET);
+                        return FALLO;
+                }
+                return posInodoReservado;
+        }
+}
 
+/**
+ * Calcula el índice del bloque de punteros.
+ * 
+ * @param nblogico, bloque lógico.
+ * @param nivel_punteros, nivel del que cuelgan el bloque de punteros.
+ * @return el índice del bloque de punteros o FALLO si los parámetros son incorrectos.
+*/
 
-        //escribir el inodo
-        if (escribir_inodo(posInodoReservado, &inodoReservado)<0){
-            fprintf(stderr, RESET"Error al escribir el inodo\n"RESET);
+int obtener_indice(unsigned int nblogico, int nivel_punteros){
+
+    if(nblogico<DIRECTOS){ //Dentro de los bloques directos.
+        return nblogico;
+    }else if(DIRECTOS<=nblogico<INDIRECTOS0){ //Dentro de los bloques indirectos 0.
+        return nblogico-DIRECTOS;
+    }else if(INDIRECTOS0<=nblogico<INDIRECTOS1){ //Dentro de los bloques indirectos 1.
+        if(nivel_punteros=2){
+            return (nblogico-INDIRECTOS0)/NPUNTEROS;
+        }else if(nivel_punteros=1){
+            return (nblogico-INDIRECTOS0)%NPUNTEROS;
+        }else{
+            fprintf(stderr, RED"Error, el nivel del puntero no es correcto.  \n"RESET);
             return FALLO;
         }
-        //decrementar la cantidad de inodos libres
-        SB.cantInodosLibres--;
-        //reescribir el SB para guardar los cambios realizados
-        if (bwrite(posSB, &SB)<0){
-        fprintf(stderr, RED"Error al guardar los cambios en el SB  \n"RESET);
+    }else if(INDIRECTOS1<=nblogico<INDIRECTOS2){ //Dentro de los bloques indirectos 2.
+            if(nivel_punteros=3){
+                return (nblogico-INDIRECTOS1)/(NPUNTEROS*NPUNTEROS);
+            }else if(nivel_punteros=2){
+                return ((nblogico-INDIRECTOS1)%(NPUNTEROS*NPUNTEROS))/NPUNTEROS;
+            }else if(nivel_punteros=1){
+                return ((nblogico-INDIRECTOS1)%(NPUNTEROS*NPUNTEROS))%NPUNTEROS;
+            }else{
+                fprintf(stderr, RED"Error, el nivel del puntero no es correcto.  \n"RESET);
+                return FALLO;
+            }
+    }else{
+        fprintf(stderr, RED"Error, El puntero no está dentro del rango máximo.  \n"RESET);
         return FALLO;
     }
-
-        return posInodoReservado;
-    }
-
-
-
-
-
 }
 
 
