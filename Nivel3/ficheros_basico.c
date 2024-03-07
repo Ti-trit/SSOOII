@@ -370,7 +370,11 @@ int liberar_bloque(unsigned int nbloque){
         fprintf(stderr, RED "Error al escribir 0 para liberar el bloque\n"RESET);
         return FALLO;
     }
-
+//guardar el SB modificado
+         if (bwrite(posSB, &SB)<0){
+        fprintf(stderr, RED"Error al guardar los cambios en el SB  \n"RESET);
+        return FALLO;
+    }
     SB.cantBloquesLibres += 1;
     return nbloque;
 }
