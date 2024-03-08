@@ -101,34 +101,23 @@ int initMB(){
 
     int bloquesMetadatos = tamSB + tamMB(SB.totBloques)+ tamAI(SB.totInodos);
       
-
-      if (bloquesMetadatos % 8 == 0)
-    {
-        for (int i = 0; i < bloquesMetadatos / 8; i++)
-        {
+        //rellenar con 1
+        for (int i = 0; i < bloquesMetadatos / 8; i++) {
             bufferMB[i] = 255;
         }
-    }
-    else // Si no ocupan bloques exactos tendremos que hacer un desplazamiento
-    {
-        for (int i = 0; i <= bloquesMetadatos / 8; i++)
-        {
-            bufferMB[i] = 255;
-        }
+        //si los Metadatos no caben en bloques exactos, hacemos un desplazamineto
+        if (bloquesMetadatos % 8 != 0) {
+            bufferMB[bloquesMetadatos/8]=255;
             bufferMB[bloquesMetadatos / 8] = bufferMB[bloquesMetadatos / 8] << (8 - (bloquesMetadatos % 8));
-    }
-     
+        }
 
-     if (bwrite(SB.posPrimerBloqueMB, bufferMB) == FALLO)
-    {
+     if (bwrite(SB.posPrimerBloqueMB, bufferMB) == FALLO){
         perror("Error initMB bwrite (MB)");
         return FALLO;
     }
 
-
             //escribir el MB actualizado
-    if (bwrite(SB.posPrimerBloqueMB, bufferMB) == FALLO)
-    {
+    if (bwrite(SB.posPrimerBloqueMB, bufferMB) == FALLO) {
         fprintf(stderr, RED"Error initMB bwrite (MB)"RESET);
         return FALLO;
     }
@@ -339,7 +328,6 @@ int reservar_bloque(){
 
         //nº de bloque físico a reservar
         int nbloque = ((nbloqueMB-SB.posPrimerBloqueMB)*BLOCKSIZE+posbyte)*8 + posbit;
-        printf ("nbloque calculado: %i \n", nbloque);
         //escrbimos el bit a 1 para indicar que está reservado
         if (escribir_bit(nbloque,1 )<0){
             fprintf(stderr, RED"Error al escribir el bit 1 para reservar el bloque\n"RESET);
@@ -362,8 +350,6 @@ int reservar_bloque(){
     }
       
         //devolver el nª del bloque reservado
-        printf("\n nbloque: %i \n ", nbloque);
-       // printf("\n posvirtual: %i \n ", posVirtual);
         return nbloque;
 
 
