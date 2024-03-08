@@ -358,6 +358,13 @@ int reservar_bloque(){
     }
 }
 
+
+
+
+
+
+
+
 /**
  * Libera un bloque determinado con la ayuda de escribir_bit()
  * @param nbloque   bloque a liberar
@@ -375,12 +382,14 @@ int liberar_bloque(unsigned int nbloque){
         fprintf(stderr, RED "Error al escribir 0 para liberar el bloque\n"RESET);
         return FALLO;
     }
+    SB.cantBloquesLibres++;
 //guardar el SB modificado
          if (bwrite(posSB, &SB)<0){
         fprintf(stderr, RED"Error al guardar los cambios en el SB  \n"RESET);
         return FALLO;
     }
-    SB.cantBloquesLibres += 1;
+    
+
     return nbloque;
 }
 
@@ -514,7 +523,6 @@ int reservar_inodo(unsigned char tipo, unsigned char permisos){
                 return posInodoReservado;
         }
 }
-
 
 
 
