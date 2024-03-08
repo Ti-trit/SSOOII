@@ -298,25 +298,6 @@ int reservar_bloque(){
         memset(bufferAux, 255, BLOCKSIZE);//poner los bits de bufferAux a 1
 
         int nbloqueMB = SB.posPrimerBloqueMB;
-        int foundNotOccupied=0;
-        while(foundNotOccupied == 0){ // Localizamos bloque desocupado
-        if(nbloqueMB > SB.posUltimoBloqueMB){ //esto deberia evitar leer memoria ilegal
-            fprintf(stderr, "targeted block not found, aborting\n");
-            return -1;
-        }
-
-        if(bread(nbloqueMB, bufferMB) == -1){ // Leemos bloque
-            fprintf(stderr, "Error while writing\n");
-            return -1;
-        }
-
-        if(memcmp(bufferMB, bufferAux, BLOCKSIZE) != 0){ // Vemos si el bloque esta desocupado
-            foundNotOccupied = 1;
-            break;
-        }
-
-        nbloqueMB++;
-    }
 
         while (nbloqueMB<=SB.posUltimoBloqueMB){
         if (bread(nbloqueMB , bufferMB)<0){
@@ -416,35 +397,6 @@ int liberar_bloque(unsigned int nbloque){
 
 
 
-
-
-/**
- * Libera un bloque determinado con la ayuda de escribir_bit()
- * @param nbloque   bloque a liberar
- * @return nbloque o FALLO si no ha ido bien
-*/
-
-int liberar_bloque(unsigned int nbloque){
-    struct superbloque SB;
-    if (bread(posLibre, &SB)==FALLO){
-        fprintf(stderr, RED "Error al leer el superbloque\n"RESET);
-        return FALLO;
-    }
-    //Escribimos el bit a 0 para indicar que esta libre
-    if (escribir_bit(nbloque, 0)<0){
-        fprintf(stderr, RED "Error al escribir 0 para liberar el bloque\n"RESET);
-        return FALLO;
-    }
-    SB.cantBloquesLibres++;
-//guardar el SB modificado
-         if (bwrite(posSB, &SB)<0){
-        fprintf(stderr, RED"Error al guardar los cambios en el SB  \n"RESET);
-        return FALLO;
-    }
-    
-
-    return nbloque;
-}
 
 /**
  * Escribir ninodo del AI para volcarlo en inodo 
