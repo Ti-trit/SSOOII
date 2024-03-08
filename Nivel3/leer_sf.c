@@ -44,10 +44,10 @@ int main(int argc, char **argv){
     printf("totBloques  = %d\n",SB.totBloques);
     printf("totInodos  = %d\n",SB.totInodos);
     //mostrar el tamaño de SB y inodo 
+    #if DEBUGN2
     printf("\nsizeof struct superbloque: %ld\n", sizeof(struct superbloque));
     printf("sizeof struct inodo: %ld\n", sizeof(struct inodo));
-
-    //recorrido de la lista de inodos libres
+    #endif
     printf("RESERVAMOS UN BLOQUE Y LUEGO LO LIBERAMOS\n");
     int bloque_reservado=reservar_bloque();
     if (bloque_reservado < 0){
@@ -63,17 +63,26 @@ int main(int argc, char **argv){
 
     printf("SB.cantBloquesLibres= %i\n",SB.cantBloquesLibres);
 
-    if (liberar_bloque(bloque_reservado)) {
+    if (liberar_bloque(bloque_reservado)<0) {
       fprintf(stderr, RED"Error al liberar un bloque\n"RESET);
       return FALLO;
     }
-    
+    if (bread(posSB, &SB)<0){
+      fprintf(stderr, RED"Error al leer el superbloque\n" RESET);
+      return FALLO;
+    }
     printf("Liberamos ese bloque y después SB.cantBloquesLibres= %i\n",SB.cantBloquesLibres);
 
-    struct inodo inodos [BLOCKSIZE/INODOSIZE];
-   int conInodos = 0;
 
-    
+
+
+
+//------------------------------------------------------------------------------------
+    struct inodo inodos [BLOCKSIZE/INODOSIZE];
+    int conInodos = 0;
+
+        //recorrido de la lista de inodos libres
+
     for (int i = SB.posPrimerBloqueAI; i <= SB.posUltimoBloqueAI; i++){
        
        if (bread(i, inodos)<1){
@@ -85,6 +94,7 @@ int main(int argc, char **argv){
         //si el inodo es libre
         if (inodos[j].tipo=='l'){
             conInodos++;
+            #if DEBUGN2
             if (conInodos<28 || (conInodos<SB.totInodos && conInodos>24980)){
             printf("%d ", conInodos);
             } else if (conInodos==29){
@@ -92,6 +102,7 @@ int main(int argc, char **argv){
             }else if (conInodos==SB.totInodos){
               printf("-1 \n");  
         }
+        #endif
        
 
     }
