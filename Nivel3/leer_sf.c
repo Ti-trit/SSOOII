@@ -54,7 +54,7 @@ int main(int argc, char **argv){
       fprintf(stderr, RED"Error al reservar un bloque\n"RESET);
       return FALLO;
     } else {
-      printf("Se ha reservado el bloque físico %d que era el 1º libre indicado por el MB",bloque_reservado);
+      printf("Se ha reservado el bloque físico %d que era el 1º libre indicado por el MB\n ",bloque_reservado);
     }
     if (bread(posSB, &SB)<0){
       fprintf(stderr, RED"Error de lectura del superbloque.\n"RESET);
