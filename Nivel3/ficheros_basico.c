@@ -283,7 +283,7 @@ char leer_bit(unsigned int nbloque){
  * Reserva el primer bloque libre que encuentra
  * @return nº del bloque reservado o FALLO si no se pudo reservar un bloque
 */
-int reservar_bloque(){
+int reservar_bloque(){ 
 
     struct superbloque SB;
     if (bread(posSB, &SB)==FALLO){
@@ -293,14 +293,31 @@ int reservar_bloque(){
         //Hay bloques libres?
     if (SB.cantBloquesLibres>0){ //SÍ
         //Encontrar el primer bloque libre
-
-        //buffer auxiliar
-        unsigned char bufferAux [BLOCKSIZE];
-        //poner los bits de bufferAux a 1
-        memset(bufferAux, 255, BLOCKSIZE);
-
         unsigned char bufferMB[BLOCKSIZE];
+        unsigned char bufferAux [BLOCKSIZE];
+        memset(bufferAux, 255, BLOCKSIZE);//poner los bits de bufferAux a 1
+
         int nbloqueMB = SB.posPrimerBloqueMB;
+        int foundNotOccupied=0;
+        while(foundNotOccupied == 0){ // Localizamos bloque desocupado
+        if(nbloqueMB > SB.posUltimoBloqueMB){ //esto deberia evitar leer memoria ilegal
+            fprintf(stderr, "targeted block not found, aborting\n");
+            return -1;
+        }
+
+        if(bread(nbloqueMB, bufferMB) == -1){ // Leemos bloque
+            fprintf(stderr, "Error while writing\n");
+            return -1;
+        }
+
+        if(memcmp(bufferMB, bufferAux, BLOCKSIZE) != 0){ // Vemos si el bloque esta desocupado
+            foundNotOccupied = 1;
+            break;
+        }
+
+        nbloqueMB++;
+    }
+
         while (nbloqueMB<=SB.posUltimoBloqueMB){
         if (bread(nbloqueMB , bufferMB)<0){
             fprintf(stderr, "Error al leer el bloque\n. "RESET);
@@ -310,11 +327,12 @@ int reservar_bloque(){
             break;
 
        }
+        nbloqueMB++;
         }
         //ahora buefferMB contiene el byte con algún bit a 0
-        //localimos de cúal byte se trata
+        //localizamos de cúal byte se trata
         int posbyte=0;
-        for (int i = posbyte; i<BLOCKSIZE; i++){
+        for (int i = 0; i<BLOCKSIZE; i++){
             if (bufferMB[i]!=255){
                 posbyte=i;
                 break;
@@ -323,28 +341,29 @@ int reservar_bloque(){
             //localisamos cual bit está a 0 del byte (posbyte)
             unsigned char mascara = 128; //10000000
             int posbit = 0;
-            while (bufferMB[posbyte]&mascara){//operador AND para bits
-                bufferMB[posbyte]<<=1;  //desplazamiento hacia la izequierda de bits
+            while (bufferMB[posbyte] & mascara){//operador AND para bits
+                bufferMB[posbyte] <<=1;  //desplazamiento hacia la izequierda de bits
                 posbit++;
             }
 
         //nº de bloque físico a reservar
-        int nbloque = (nbloqueMB*BLOCKSIZE*posbyte)*byte + posbit;
+        int nbloque = ((nbloqueMB-SB.posPrimerBloqueMB)*BLOCKSIZE+posbyte)*8 + posbit;
         //escrbimos el bit a 1 para indicar que está reservado
         if (escribir_bit(nbloque,1 )<0){
             fprintf(stderr, RED"Error al escribir el bit 1 para reservar el bloque\n"RESET);
             return FALLO;
         }
         //decrementamos la cantidad de bloques libres
-        SB.cantBloquesLibres-=1;
+        SB.cantBloquesLibres--;
         //limpiamos ese bloque en la zona de datos
+        int posVirtual= nbloque+SB.posPrimerBloqueDatos-1;
         memset(bufferAux, 0, BLOCKSIZE);
-        if (bwrite(nbloque, bufferAux)<0){
+        if (bwrite(posVirtual, bufferAux)<0){
             fprintf(stderr, RED"Error al limpiar el bloque reservado en al zona de datos\n"RESET);
             return FALLO;
         }
             
-             if (bwrite(posSB, &SB)<0){
+        if (bwrite(posSB, &SB)<0){
         fprintf(stderr, RED"Error al guardar los cambios en el SB  \n"RESET);
         return FALLO;
     }
@@ -358,6 +377,40 @@ int reservar_bloque(){
     }
 }
 
+
+
+
+
+
+
+
+/**
+ * Libera un bloque determinado con la ayuda de escribir_bit()
+ * @param nbloque   bloque a liberar
+ * @return nbloque o FALLO si no ha ido bien
+*/
+
+int liberar_bloque(unsigned int nbloque){
+    struct superbloque SB;
+    if (bread(posLibre, &SB)==FALLO){
+        fprintf(stderr, RED "Error al leer el superbloque\n"RESET);
+        return FALLO;
+    }
+    //Escribimos el bit a 0 para indicar que esta libre
+    if (escribir_bit(nbloque, 0)<0){
+        fprintf(stderr, RED "Error al escribir 0 para liberar el bloque\n"RESET);
+        return FALLO;
+    }
+    SB.cantBloquesLibres++;
+//guardar el SB modificado
+         if (bwrite(posSB, &SB)<0){
+        fprintf(stderr, RED"Error al guardar los cambios en el SB  \n"RESET);
+        return FALLO;
+    }
+    
+
+    return nbloque;
+}
 
 
 
