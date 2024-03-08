@@ -516,6 +516,7 @@ if (bread(posLibre, &SB)==FALLO){
 
         return posInodoReservado;
     }
+}
 
 
 
@@ -558,10 +559,99 @@ int obtener_indice(unsigned int nblogico, int nivel_punteros){
         return FALLO;
     }
 }
+}
 
+
+
+int traducir_bloque_inodo(struct inodo *inodo, unsigned int nblogico, unsigned char reservar){
+    unsigned int ptr = 0;
+    unsigned int ptr_ant= 0;
+    int nRangoBL = obtener_RangoBL(inodo, nblogico, &ptr);
+    if (nRangoBL<0){
+        fprintf(stderr, RED "Error obtener_RangoBL\n" RESET);
+        return FALLO;
+    }
+    
+    int nivel_punteros = nRangoBL; 
+    unsigned char buffer[BLOCKSIZE];
+    int indice = 0;
+    while (nivel_punteros>0){
+        if (ptr==0){
+            if (reservar == 0){
+                //bloque inexistente
+                return FALLO;
+            }else{
+                ptr = reservar_bloque();
+                if (ptr<0){
+                    fprintf(stderr, RED"Error de reservar_bloque() en traduicr_bloque_inodo\n"RESET);
+                    return FALLO;
+                }
+                inodo->numBloquesOcupados++;
+                inodo->ctime = time(NULL); //fecha actual
+                if (nivel_punteros==nRangoBL){
+                    inodo->punterosDirectos[nRangoBL-1]=ptr;
+                }else{
+                    buffer[indice]=ptr;
+                    if (bwrite(ptr_ant, buffer)<0){
+                        fprintf(stderr, RED "Error al escribir en el buffer\n" RESET);
+                        return FALLO;
+                    }
+                }
+            }
+            memset(buffer, 0, BLOCKSIZE);
+        }else{
+            if (bread(ptr, buffer)<0){
+                 fprintf(stderr, RED " Error al leer del buffer\n" RESET);
+                 return FALLO;   
+            }
+
+        }
+    indice = obtener_indice(nblogico, nivel_punteros);
+    if (indice<0){
+        fprintf(stderr, RED "Indice invalido\n"RESET);
+        return FALLO;
+    }
+    ptr_ant = ptr;
+    ptr = buffer[indice];
+    nivel_punteros--;
+    }
+
+    if (ptr == 0){
+        if (reservar==0){
+            return FALLO;
+        }else{
+            ptr = reservar_bloque();
+             if (ptr<0){
+                    fprintf(stderr, RED"Error de reservar_bloque() en traduicr_bloque_inodo\n"RESET);
+                    return FALLO;
+                }
+            inodo->numBloquesOcupados++;
+            inodo->ctime= time (NULL);
+            if (nRangoBL==0){
+                inodo->punterosDirectos[nblogico]=ptr;
+            }else{
+                buffer [indice]=ptr;
+                if (bwrite(ptr_ant, buffer)){
+                        fprintf(stderr, RED "Error al escribir en el buffer\n" RESET);
+                        return FALLO;
+                    
+                }
+            }
+        }
+    }
 
 
 }
+
+
+
+
+
+
+
+
+
+
 
 
 
