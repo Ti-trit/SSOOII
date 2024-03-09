@@ -74,9 +74,56 @@ int main(int argc, char **argv){
     printf("Liberamos ese bloque y después SB.cantBloquesLibres= %i\n",SB.cantBloquesLibres);
 
 
+    printf("MAPA DE BITS CON BLOQUES DE METADATOS OCUPADOS\n");
+    int bit_leido=leer_bit(posSB);
+    if (bit_leido < 0) {
+      fprintf(stderr, RED"Error al leer el bit del SB\n" RESET);
+    }
+    printf("posSB: %i -> leerbit(%i) = %i\n", posSB, posSB, bit_leido);
 
+    bit_leido=leer_bit(SB.posPrimerBloqueMB);
+    if (bit_leido < 0) {
+      fprintf(stderr, RED"Error al leer el primer bit del bloque de MB\n" RESET);
+    }
+    printf("SB.posPrimerBloqueMB: %i -> leer_bit(%i) = %i\n", SB.posPrimerBloqueMB, SB.posPrimerBloqueMB, bit_leido);
 
+    bit_leido=leer_bit(SB.posUltimoBloqueMB);
+    if (bit_leido < 0) {
+      fprintf(stderr, RED"Error al leer el bit del ultimo bloque de MB\n" RESET);
+    }
+    printf("SB.posUltimoBloqueMB: %i -> leer_bit(%i) = %i\n", SB.posUltimoBloqueMB, SB.posUltimoBloqueMB, bit_leido);
+    
+    bit_leido=leer_bit(SB.posPrimerBloqueAI);
+    if (bit_leido < 0) {
+      fprintf(stderr, RED"Error al leer el primer bit del bloque AI\n" RESET);
+    }
+    printf("SB.posPrimerBloqueAI: %i -> leer_bit(%i) = %i\n", SB.posPrimerBloqueAI, SB.posPrimerBloqueAI, bit_leido);
 
+    bit_leido=leer_bit(SB.posUltimoBloqueAI);
+    if (bit_leido < 0) {
+      fprintf(stderr, RED"Error al leer el ultimo bit del bloque AI\n" RESET);
+    }
+    printf("SB.posUltimoBloqueAI: %i -> leer_bit(%i) = %i\n", SB.posUltimoBloqueAI, SB.posUltimoBloqueAI, bit_leido);
+
+    bit_leido=leer_bit(SB.posPrimerBloqueDatos);
+    if (bit_leido < 0) {
+      fprintf(stderr, RED"Error al leer el primer bloque de datos\n" RESET);
+    }
+    printf("SB.posPrimerBloqueDatos: %i -> leer_bit(%i) = %i\n", SB.posPrimerBloqueDatos, SB.posPrimerBloqueDatos, bit_leido);
+
+    bit_leido=leer_bit(SB.posUltimoBloqueDatos);
+    if (bit_leido < 0) {
+      fprintf(stderr, RED"Error al leer el ultimo bloque de datos\n" RESET);
+    }
+    printf("SB.posUltimoBloqueDatos: %i -> leer_bit(%i) = %i\n", SB.posUltimoBloqueDatos, SB.posUltimoBloqueDatos, bit_leido);
+
+    struct inodo inodo_raiz [BLOCKSIZE/INODOSIZE];
+    if (leer_inodo(0, inodo_raiz) < 0) {
+      fprintf(stderr, RED"Error al leer el inodo raiz\n" RESET);
+    }
+    printf("DATOS DEL DIRECTORIO RAIZ\n");
+    printf("tipo: %c\n", inodo_raiz->tipo);
+    printf("permisos: %i\n", inodo_raiz->permisos);
 //------------------------------------------------------------------------------------
     struct inodo inodos [BLOCKSIZE/INODOSIZE];
     int conInodos = 0;
