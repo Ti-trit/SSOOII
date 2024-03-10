@@ -518,6 +518,33 @@ if (bread(posLibre, &SB)==FALLO){
     }
 }
 
+/**
+ * Calculo el rango del bloque lógico
+ * @param inodo estructura del inodo
+ * @param nblogico bloque logico
+ * @param ptr direccion del puntero
+*/
+
+int obtener_nRangoBL(struct inodo *inodo, unsigned int nblogico, unsigned int *ptr) {
+    if (nblogico < DIRECTOS) {
+        *ptr = inodo->punterosDirectos[nblogico];
+        return 0;
+    } else if (nblogico < INDIRECTOS0) {
+        *ptr = inodo->punterosIndirectos[0];
+        return 1;
+    } else if (nblogico < INDIRECTOS1) {
+        *ptr = inodo->punterosIndirectos[1];
+        return 2;
+    } else if (nblogico < INDIRECTOS2) {
+        *ptr = inodo->punterosIndirectos[2];
+        return 3;
+    } else {
+        *ptr = 0;
+        fprintf(stderr, RED"Error al obtener el rango del bloque lógico\n",RESET);
+        return FALLO;
+    }
+
+}
 
 
 /**
