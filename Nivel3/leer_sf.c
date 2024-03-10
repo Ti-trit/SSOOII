@@ -118,13 +118,40 @@ int main(int argc, char **argv){
     printf("SB.posUltimoBloqueDatos: %i -> leer_bit(%i) = %i\n", SB.posUltimoBloqueDatos, SB.posUltimoBloqueDatos, bit_leido);
 
     struct inodo inodo_raiz [BLOCKSIZE/INODOSIZE];
-    if (leer_inodo(0, inodo_raiz) < 0) {
+    int ninodo = 0;
+    if (leer_inodo(ninodo, inodo_raiz) < 0) {
       fprintf(stderr, RED"Error al leer el inodo raiz\n" RESET);
     }
     printf("DATOS DEL DIRECTORIO RAIZ\n");
     printf("tipo: %c\n", inodo_raiz->tipo);
     printf("permisos: %i\n", inodo_raiz->permisos);
-//------------------------------------------------------------------------------------
+
+    struct tm *ts;
+    char atime[80];
+    char mtime[80];
+    char ctime[80];
+
+    // Leer los datos del inodo especificado por 'ninodo'.
+
+    // Convierte el tiempo de último acceso del inodo a formato local y luego a cadena.
+    ts = localtime(&inodo_raiz->atime);
+    strftime(atime, sizeof(atime), "%a %Y-%m-%d %H:%M:%S", ts);
+
+    // Convierte el tiempo de última modificación del inodo a formato local y luego a cadena.
+    ts = localtime(&inodo_raiz->mtime);
+    strftime(mtime, sizeof(mtime), "%a %Y-%m-%d %H:%M:%S", ts);
+
+    // Convierte el tiempo de cambio del estado del inodo a formato local y luego a cadena.
+    ts = localtime(&inodo_raiz->ctime);
+    strftime(ctime, sizeof(ctime), "%a %Y-%m-%d %H:%M:%S", ts);
+
+    // Imprime los tiempos del inodo en la salida estándar.
+    printf("ATIME: %s \nMTIME: %s \nCTIME: %s\n", atime, mtime, ctime);
+
+    printf("nlinks: %i\n", inodo_raiz->nlinks);
+    printf("tamEnBytesLog: %i\n", inodo_raiz->tamEnBytesLog);
+    printf("numBloquesOcupados: %i\n", inodo_raiz->numBloquesOcupados);
+    //------------------------------------------------------------------------------------
     struct inodo inodos [BLOCKSIZE/INODOSIZE];
     int conInodos = 0;
 
