@@ -91,33 +91,42 @@ int initSB(unsigned int nbloques, unsigned int ninodos){
 int initMB(){
     struct superbloque SB;
     unsigned char  bufferMB [BLOCKSIZE];
-    memset(bufferMB, 0,BLOCKSIZE);
-
+    if ( memset(bufferMB, 0,BLOCKSIZE)==NULL){
+        fprintf(stderr, RED"Error de memset()\n"RESET);
+        return FALLO;
+    }
+   
     //leer el superbloque para obtener nº de bloques y inodos
     if (bread(posSB, &SB)<0){
-        fprintf(stderr, RED "Error al leer el SB (initMB())\n"RESET);
+        fprintf(stderr, RED "Error al leer el SB en el metodo initMB() \n"RESET);
         return FALLO;
     }
 
     int bloquesMetadatos = tamSB + tamMB(SB.totBloques)+ tamAI(SB.totInodos);
     
-    int escribir_bloque = SB.posPrimerBloqueMB;
+    int posEscribir_bloque = SB.posPrimerBloqueMB;
     int bytes_bincompleto = (bloquesMetadatos/8)%BLOCKSIZE;
 
     if ((bloquesMetadatos/8)>BLOCKSIZE) {
-        int bloques_completos = (bloquesMetadatos/8)/BLOCKSIZE;
+        int bloques_completos = (bloquesMetadatos/8)/BLOCKSIZE; 
         
-        while (escribir_bloque < (bloques_completos+SB.posPrimerBloqueMB)) { 
-            memset(bufferMB, 255, BLOCKSIZE);
-            if (bwrite(escribir_bloque,bufferMB)<0) {
+        while (posEscribir_bloque < (bloques_completos+SB.posPrimerBloqueMB)) { 
+            if (memset(bufferMB, 255,BLOCKSIZE)==NULL){
+                    fprintf(stderr, RED"Error de memset()\n"RESET);
+                    return FALLO;
+             }
+            if (bwrite(posEscribir_bloque,bufferMB)<0) {
                 fprintf(stderr, RED"Error al escribir en el disco el MB\n"RESET);
                 return FALLO;
             }
-            escribir_bloque++;
+            posEscribir_bloque++;
         }
     }
     if (bytes_bincompleto != 0) {
-        memset(bufferMB, 0,BLOCKSIZE);
+       if ( memset(bufferMB, 0,BLOCKSIZE)==NULL){
+            fprintf(stderr, RED"Error de memset()\n"RESET);
+            return FALLO;
+       }
         for (int i=0;i < bytes_bincompleto; i++){
             bufferMB[i] = 255;
         }
@@ -125,16 +134,14 @@ int initMB(){
             bufferMB[bytes_bincompleto]=255;
             bufferMB[bytes_bincompleto] = bufferMB[bytes_bincompleto] << (8 - (bloquesMetadatos % 8));
         }
-        if (bwrite(escribir_bloque, bufferMB)<0) {
+        if (bwrite(posEscribir_bloque, bufferMB)<0) {
             fprintf(stderr, RED"Error initMB bwrite (MB)"RESET);
             return FALLO;
         }
     }
 
     //restar estos bloques de la cantidad de bloques libres
-
     SB.cantBloquesLibres -= bloquesMetadatos;
-
     //guardar los cambios en el superbloque
     if (bwrite(posSB, &SB)<0){
         fprintf(stderr, RED"Error al guardar los cambios en el SB  \n"RESET);
@@ -143,7 +150,6 @@ int initMB(){
    
    return EXITO;
 }
-
 
 
 
