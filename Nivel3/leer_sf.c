@@ -48,7 +48,7 @@ int main(int argc, char **argv){
     printf("\nsizeof struct superbloque: %ld\n", sizeof(struct superbloque));
     printf("sizeof struct inodo: %ld\n", sizeof(struct inodo));
     #endif
-    printf("RESERVAMOS UN BLOQUE Y LUEGO LO LIBERAMOS\n");
+    printf("\n\nRESERVAMOS UN BLOQUE Y LUEGO LO LIBERAMOS\n");
     int bloque_reservado=reservar_bloque();
     if (bloque_reservado < 0){
       fprintf(stderr, RED"Error al reservar un bloque\n"RESET);
@@ -74,7 +74,7 @@ int main(int argc, char **argv){
     printf("Liberamos ese bloque y después SB.cantBloquesLibres= %i\n",SB.cantBloquesLibres);
 
 
-    printf("MAPA DE BITS CON BLOQUES DE METADATOS OCUPADOS\n");
+    printf("\n\nMAPA DE BITS CON BLOQUES DE METADATOS OCUPADOS\n");
     int bit_leido=leer_bit(posSB);
     if (bit_leido < 0) {
       fprintf(stderr, RED"Error al leer el bit del SB\n" RESET);
@@ -122,7 +122,7 @@ int main(int argc, char **argv){
     if (leer_inodo(ninodo, inodo_raiz) < 0) {
       fprintf(stderr, RED"Error al leer el inodo raiz\n" RESET);
     }
-    printf("DATOS DEL DIRECTORIO RAIZ\n");
+    printf("\nDATOS DEL DIRECTORIO RAIZ\n");
     printf("tipo: %c\n", inodo_raiz->tipo);
     printf("permisos: %i\n", inodo_raiz->permisos);
 
@@ -146,7 +146,7 @@ int main(int argc, char **argv){
     strftime(ctime, sizeof(ctime), "%a %Y-%m-%d %H:%M:%S", ts);
 
     // Imprime los tiempos del inodo en la salida estándar.
-    printf("ATIME: %s \nMTIME: %s \nCTIME: %s\n", atime, mtime, ctime);
+    printf("atime: %s \nmtime: %s \nctime: %s\n", atime, mtime, ctime);
 
     printf("nlinks: %i\n", inodo_raiz->nlinks);
     printf("tamEnBytesLog: %i\n", inodo_raiz->tamEnBytesLog);
