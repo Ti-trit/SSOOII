@@ -100,30 +100,40 @@ int initMB(){
     }
 
     int bloquesMetadatos = tamSB + tamMB(SB.totBloques)+ tamAI(SB.totInodos);
-      
-        //rellenar con 1
-        for (int i = 0; i < bloquesMetadatos / 8; i++) {
+    
+    int escribir_bloque = SB.posPrimerBloqueMB;
+    int bytes_bincompleto = (bloquesMetadatos/8)%BLOCKSIZE;
+
+    if ((bloquesMetadatos/8)>BLOCKSIZE) {
+        int bloques_completos = (bloquesMetadatos/8)/BLOCKSIZE;
+        
+        while (escribir_bloque < (bloques_completos+SB.posPrimerBloqueMB)) { 
+            memset(bufferMB, 255, BLOCKSIZE);
+            if (bwrite(escribir_bloque,bufferMB)<0) {
+                fprintf(stderr, RED"Error al escribir en el disco el MB\n"RESET);
+                return FALLO;
+            }
+            escribir_bloque++;
+        }
+    }
+    if (bytes_bincompleto != 0) {
+        memset(bufferMB, 0,BLOCKSIZE);
+        for (int i=0;i < bytes_bincompleto; i++){
             bufferMB[i] = 255;
         }
-        //si los Metadatos no caben en bloques exactos, hacemos un desplazamineto
         if (bloquesMetadatos % 8 != 0) {
-            bufferMB[bloquesMetadatos/8]=255;
-            bufferMB[bloquesMetadatos / 8] = bufferMB[bloquesMetadatos / 8] << (8 - (bloquesMetadatos % 8));
+            bufferMB[bytes_bincompleto]=255;
+            bufferMB[bytes_bincompleto] = bufferMB[bytes_bincompleto] << (8 - (bloquesMetadatos % 8));
         }
-
-     if (bwrite(SB.posPrimerBloqueMB, bufferMB) == FALLO){
-        perror("Error initMB bwrite (MB)");
-        return FALLO;
+        if (bwrite(escribir_bloque, bufferMB)<0) {
+            fprintf(stderr, RED"Error initMB bwrite (MB)"RESET);
+            return FALLO;
+        }
     }
 
-            //escribir el MB actualizado
-    if (bwrite(SB.posPrimerBloqueMB, bufferMB) == FALLO) {
-        fprintf(stderr, RED"Error initMB bwrite (MB)"RESET);
-        return FALLO;
-    }
-     //restar estos bloques de la cantidad de bloques libres
+    //restar estos bloques de la cantidad de bloques libres
 
-             SB.cantBloquesLibres -= bloquesMetadatos;
+    SB.cantBloquesLibres -= bloquesMetadatos;
 
     //guardar los cambios en el superbloque
     if (bwrite(posSB, &SB)<0){
