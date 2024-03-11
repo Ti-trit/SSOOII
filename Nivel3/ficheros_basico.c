@@ -282,13 +282,16 @@ char leer_bit(unsigned int nbloque){
         return FALLO;
     }
     //obtener la posición de este byte dentro del bufferMB
+    int copyposbyte = posbyte;
     posbyte = posbyte % BLOCKSIZE;
-
+      
     unsigned char mascara = 128; // 10000000
     mascara>>= posbit; // Desplazamiento del bit "posbit" veces a la derecha.
     mascara&=bufferMB[posbyte]; // operador AND
     mascara>>=(7-posbit); //desplazamos el bit al extremo derecho.
 
+    printf(GRAY"[leer_bit(%i) → posbyte:%i, posbyte (ajustado): %i, posbit:%i, nbloqueMB:%i, nbloqueabs:%i)]\n\n" RESET, nbloque, copyposbyte, posbyte, posbit, nbloqueMB, nbloqueabs);
+   
     return mascara;
 }
 
@@ -374,6 +377,8 @@ int reservar_bloque(){
         return FALLO;
     }
 }
+
+
 
 
 int liberar_bloque(unsigned int nbloque){
