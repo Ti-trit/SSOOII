@@ -562,20 +562,20 @@ int obtener_indice(unsigned int nblogico, int nivel_punteros){
     }else if((DIRECTOS<=nblogico)&&(nblogico<INDIRECTOS0)){ //Dentro de los bloques indirectos 0.
         return nblogico-DIRECTOS;
     }else if((INDIRECTOS0<=nblogico)&&(nblogico<INDIRECTOS1)){ //Dentro de los bloques indirectos 1.
-        if(nivel_punteros=2){
+        if(nivel_punteros==2){
             return (nblogico-INDIRECTOS0)/NPUNTEROS;
-        }else if(nivel_punteros=1){
+        }else if(nivel_punteros==1){
             return (nblogico-INDIRECTOS0)%NPUNTEROS;
         }else{
             fprintf(stderr, RED"Error, el nivel del puntero no es correcto.  \n"RESET);
             return FALLO;
         }
     }else if((INDIRECTOS1<=nblogico)&&(nblogico<INDIRECTOS2)){ //Dentro de los bloques indirectos 2.
-            if(nivel_punteros=3){
+            if(nivel_punteros==3){
                 return (nblogico-INDIRECTOS1)/(NPUNTEROS*NPUNTEROS);
-            }else if(nivel_punteros=2){
+            }else if(nivel_punteros==2){
                 return ((nblogico-INDIRECTOS1)%(NPUNTEROS*NPUNTEROS))/NPUNTEROS;
-            }else if(nivel_punteros=1){
+            }else if(nivel_punteros==1){
                 return ((nblogico-INDIRECTOS1)%(NPUNTEROS*NPUNTEROS))%NPUNTEROS;
             }else{
                 fprintf(stderr, RED"Error, el nivel del puntero no es correcto.  \n"RESET);
