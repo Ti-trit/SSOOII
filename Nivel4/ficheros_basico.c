@@ -559,25 +559,39 @@ int obtener_indice(unsigned int nblogico, int nivel_punteros){
 
     if(nblogico<DIRECTOS){ //Dentro de los bloques directos.
         return nblogico;
-    }else if((DIRECTOS<=nblogico)&&(nblogico<INDIRECTOS0)){ //Dentro de los bloques indirectos 0.
+
+    }else if(nblogico<INDIRECTOS0){ //Dentro de los bloques indirectos 0.
         return nblogico-DIRECTOS;
-    }else if((INDIRECTOS0<=nblogico)&&(nblogico<INDIRECTOS1)){ //Dentro de los bloques indirectos 1.
+
+    }else if(nblogico<INDIRECTOS1){ //Dentro de los bloques indirectos 1.
+      
         if(nivel_punteros==2){
-            return (nblogico-INDIRECTOS0)/NPUNTEROS;
+
+            return ((nblogico-INDIRECTOS0)/NPUNTEROS);
+        
         }else if(nivel_punteros==1){
-            return (nblogico-INDIRECTOS0)%NPUNTEROS;
+
+            return ((nblogico-INDIRECTOS0)%NPUNTEROS);
+        
         }else{
             fprintf(stderr, RED"Error, el nivel del puntero no es correcto.  \n"RESET);
             return FALLO;
         }
-    }else if((INDIRECTOS1<=nblogico)&&(nblogico<INDIRECTOS2)){ //Dentro de los bloques indirectos 2.
+    }else if(nblogico<INDIRECTOS2){ //Dentro de los bloques indirectos 2.
             if(nivel_punteros==3){
-                return (nblogico-INDIRECTOS1)/(NPUNTEROS*NPUNTEROS);
+
+                return ((nblogico-INDIRECTOS1)/(NPUNTEROS*NPUNTEROS));
+            
             }else if(nivel_punteros==2){
-                return ((nblogico-INDIRECTOS1)%(NPUNTEROS*NPUNTEROS))/NPUNTEROS;
+
+                return (((nblogico-INDIRECTOS1)%(NPUNTEROS*NPUNTEROS))/NPUNTEROS);
+           
             }else if(nivel_punteros==1){
-                return ((nblogico-INDIRECTOS1)%(NPUNTEROS*NPUNTEROS))%NPUNTEROS;
+
+                return (((nblogico-INDIRECTOS1)%(NPUNTEROS*NPUNTEROS))%NPUNTEROS);
+            
             }else{
+
                 fprintf(stderr, RED"Error, el nivel del puntero no es correcto.  \n"RESET);
                 return FALLO;
             }
@@ -587,12 +601,22 @@ int obtener_indice(unsigned int nblogico, int nivel_punteros){
     }
 }
 
-
+/** Obtiene el nº del bloque físico correspondiente a un bloque lógico determinado
+ * del indo especificado.
+ * @param   inodo       inodo del bloque logico
+ * @param   nblogic     nº del bloque lógico
+ * @param   reservar    indica el modo de uso de este metodo   
+ * reservar = 0 --> consultas
+ * reservar = 1 --> consultas para bloques existentes, y reservación de bloque si el bloque no existe.
+ * @return  el bloque fisico deseado o FALLO si la traducción no fue existosa
+*/
 
 int traducir_bloque_inodo(struct inodo *inodo, unsigned int nblogico, unsigned char reservar){
     unsigned int ptr = 0;
     unsigned int ptr_ant= 0;
-    int nRangoBL = obtener_RangoBL(inodo, nblogico, &ptr); //0:D, 1:I0, 2:I1, 3:I2
+  //  unsigned int modified =0;
+    int nRangoBL = obtener_nRangoBL(inodo, nblogico, &ptr); //0:D, 1:I0, 2:I1, 3:I2
+    
     if (nRangoBL<0){
         fprintf(stderr, RED "Error obtener_RangoBL\n" RESET);
         return FALLO;
@@ -603,7 +627,7 @@ int traducir_bloque_inodo(struct inodo *inodo, unsigned int nblogico, unsigned c
     int indice = 0;
     while (nivel_punteros>0){ //iteramos por todos los niveles de punteros
         if (ptr==0){    //no cuelgan punteros de bloques
-            if (reservar == 0){
+            if (reservar == 0){ // hacer consultas
                 //no notificamos el error
                 //bloque inexistente
                 return FALLO;
@@ -614,18 +638,20 @@ int traducir_bloque_inodo(struct inodo *inodo, unsigned int nblogico, unsigned c
                     fprintf(stderr, RED"Error de reservar_bloque() en traduicr_bloque_inodo\n"RESET);
                     return FALLO;
                 }
+              //  modified=1;
                 inodo->numBloquesOcupados++;
-                inodo->ctime = time(NULL); //fecha actual
-                if (nivel_punteros==nRangoBL){//NIVEL 0
+                inodo->ctime = time(NULL); //actualizar el ctime ya que estamos modificando datos del inodo
+                    //el bloque cuelga directamente del inodo
+                if (nivel_punteros==nRangoBL){
                     inodo->punterosDirectos[nRangoBL-1]=ptr;
-                printf(GRAY "[traducir_bloque_inodo()→ inodo.punterosIndirectos[%i] = %i (reservado BF %i para punteros_nivel%i)]\n"RESET, nRangoBL-1,ptr, nRangoBL-1, nivel_punteros);
+                
+                printf(GRAY "[traducir_bloque_inodo()→ inodo.punterosIndirectos[%i] = %i (reservado BF %i para punteros_nivel%i)]\n\n"RESET, nRangoBL-1,ptr, ptr, nivel_punteros);
                  
-            
                 }else{
-                    //NIVEL1--> el bloque cuelga de otro bloque de punteros
+                    // el bloque cuelga de otro bloque de punteros
                     buffer[indice]=ptr;
             
-                printf(GRAY "[traducir_bloque_inodo()→ punteros_nivel%i [%i] = %i (reservado BF %i para BL %i)]\n" RESET, nivel_punteros, indice, ptr, ptr, nivel_punteros);
+                printf(GRAY "\n[traducir_bloque_inodo()→ punteros_nivel%i [%i] = %i (reservado BF %i para BL %i)]\n" RESET, nivel_punteros, ptr_ant, ptr, ptr, nblogico);
 
                     if (bwrite(ptr_ant, buffer)<0){
                         fprintf(stderr, RED "Error al escribir en el buffer\n" RESET);
@@ -652,12 +678,14 @@ int traducir_bloque_inodo(struct inodo *inodo, unsigned int nblogico, unsigned c
     nivel_punteros--;
     }
 
+//estamos al nivel de datos
     if (ptr == 0){
         if (reservar==0){
             //error de lectura, bloque inexistente
             return FALLO;
         }else{
             ptr = reservar_bloque();
+              // modified=1;
              if (ptr<0){
                     fprintf(stderr, RED"Error de reservar_bloque() en traduicr_bloque_inodo\n"RESET);
                     return FALLO;
@@ -666,32 +694,32 @@ int traducir_bloque_inodo(struct inodo *inodo, unsigned int nblogico, unsigned c
             inodo->ctime= time (NULL);
             if (nRangoBL==0){//puntero directo
                 inodo->punterosDirectos[nblogico]=ptr; //asignamos la direción del bl. de datos en el inodo
-             printf(GRAY "[traducir_bloque_inodo()→ inodo.punterosDirectos[%i] = %i (reservado BF %i para BL %i)]\n"RESET, nRangoBL-1,ptr, reservar, nblogico);
+        
+         printf(GRAY "[traducir_bloque_inodo()→ inodo.punterosDirectos[%i] = %i (reservado BF %i para BL %i)]\n"RESET,nblogico ,ptr, ptr, nblogico);
 
 
             }else{
                 buffer[indice]=ptr;  //asignamos la dirección del bloque de datos en el buffer
-                printf(GRAY "[traducir_bloque_inodo()→ punteros_nivel%i [%i] = %i (reservado BF %i para BL %i)]\n" RESET, nivel_punteros, indice, ptr, ptr, nivel_punteros);
-
-                if (bwrite(ptr_ant, buffer)){ //salvamos en el dispositivo el buffer de punteros modificado
-                        fprintf(stderr, RED "Error al escribir en el buffer\n" RESET);
+                //printf(GRAY "[traducir_bloque_inodo()→ punteros_nivel%i [%i] = %i (reservado BF %i para BL %i)]\n" RESET, nivel_punteros, indice, ptr, ptr, nblogico);
+                printf(GRAY"[traducir_bloque_inodo()→ punteros_nivel%i[%i] = %i (reservado BF %i para BL %i)]\n"RESET,nRangoBL-1, indice, ptr, ptr, nblogico);
+                if (bwrite(ptr_ant, buffer)<0){ //salvamos en el dispositivo el buffer de punteros modificado
+                        fprintf(stderr, RED "Error al escribir en el buffer bwrite(ptr_ant, buffer) \n" RESET);
                         return FALLO;
                     
                 }
+                //salvar el inodo
+               /* if (modified==1){ //si se han hecho cambio en el inodo
+                if (escribir_inodo(ninodo,inodo)<0){
+                    fprintf(stderr, "Error al salvar el inodo en traducir_bloque_inodo()\n"RESET);
+                    return FALLO;
+                }
+                }
+                */
+               //Por ahora la funcion mi_write_f salvara los datos del inodo
             }
         }
     }
-        return ptr;
+    return ptr;
 
 
 }
-
-
-
-
-
-
-
-
-
-
