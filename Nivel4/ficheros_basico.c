@@ -586,7 +586,7 @@ int obtener_indice(unsigned int nblogico, int nivel_punteros){
         return FALLO;
     }
 }
-}
+
 
 
 int traducir_bloque_inodo(struct inodo *inodo, unsigned int nblogico, unsigned char reservar){
