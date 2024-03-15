@@ -641,7 +641,7 @@ int traducir_bloque_inodo(struct inodo *inodo, unsigned int nblogico, unsigned c
     }
     
     int nivel_punteros = nRangoBL; //nivel mas alto es el que cuelga directamente del inodo
-    unsigned char buffer[BLOCKSIZE];
+    unsigned char buffer[NPUNTEROS];
     int indice = 0;
     while (nivel_punteros>0){ //iteramos por todos los niveles de punteros
         if (ptr==0){    //no cuelgan punteros de bloques
@@ -678,7 +678,10 @@ int traducir_bloque_inodo(struct inodo *inodo, unsigned int nblogico, unsigned c
                 
                 }
             }
-            memset(buffer, 0, BLOCKSIZE);
+            if (memset(buffer, 0, NPUNTEROS)==NULL){
+                perror("memset()");
+                return FALLO;
+            }
         }else{
             if (bread(ptr, buffer)<0){
                  fprintf(stderr, RED " Error al leer del buffer\n" RESET);
