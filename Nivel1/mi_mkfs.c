@@ -48,7 +48,7 @@ int nbloques = atoi(argv[2]);
     return FALLO;
   }
 
-    
+    return EXITO;
 
 
 }
