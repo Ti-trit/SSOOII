@@ -61,6 +61,6 @@ int nbloques = atoi(argv[2]);
   }
 
     
-
+return EXITO;
 
 }
