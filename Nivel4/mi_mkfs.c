@@ -67,5 +67,6 @@ int nbloques = atoi(argv[2]);
     fprintf(stderr, RED"Error al desmontar el dispositivo.\n" RESET);
     return FALLO;
   }
+ return EXITO;
 
 }
