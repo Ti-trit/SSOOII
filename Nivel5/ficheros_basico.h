@@ -13,6 +13,8 @@
 #define INODOSIZE 128 // tamaño en bytes de un inodo
 #define DEBUGN2   0
 #define DEBUGN3   0
+#define DEBUGN4   0
+
 //Metodos
 
 
