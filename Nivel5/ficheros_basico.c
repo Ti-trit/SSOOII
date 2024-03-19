@@ -661,15 +661,15 @@ int traducir_bloque_inodo(struct inodo *inodo, unsigned int nblogico, unsigned c
                 inodo->ctime = time(NULL); //actualizar el ctime ya que estamos modificando datos del inodo
                     //el bloque cuelga directamente del inodo
                 if (nivel_punteros==nRangoBL){
+            printf(GRAY "\n[traducir_bloque_inodo()→ inodo.punterosIndirectos[%i] = %i (reservado BF %i para punteros_nivel%i)]\n"RESET, nRangoBL - 1, ptr, ptr, nivel_punteros);
+
                     inodo->punterosIndirectos[nRangoBL-1]=ptr;
-                
-                printf(GRAY "\n[traducir_bloque_inodo()→ inodo.punterosIndirectos[%i] = %i (reservado BF %i para punteros_nivel%i)]\n"RESET, nRangoBL-1,ptr, ptr, nivel_punteros);
-                 
+                                 
                 }else{
                     // el bloque cuelga de otro bloque de punteros
                     buffer[indice]=ptr;
-            
-                printf(GRAY"[traducir_bloque_inodo()→ punteros_nivel%i[%i] = %i (reservado BF %i para BL %i)]\n"RESET,nRangoBL, indice, ptr, ptr, nblogico);
+                printf(GRAY"[traducir_bloque_inodo()→ punteros_nivel%i[%i] = %i (reservado BF %i para punteros_nivel%i)]\n"RESET, nivel_punteros+1, indice, ptr, ptr, nivel_punteros);
+
 
                     if (bwrite(ptr_ant, buffer)<0){
                         fprintf(stderr, RED "Error al escribir en el buffer\n" RESET);
@@ -716,15 +716,16 @@ int traducir_bloque_inodo(struct inodo *inodo, unsigned int nblogico, unsigned c
             inodo->numBloquesOcupados++;
             inodo->ctime= time (NULL);
             if (nRangoBL==0){//puntero directo
+
+            printf(GRAY"\n[traducir_bloque_inodo()→ punterosDirectos[%i] = %i (reservado BF %i para BL %i)]\n"RESET, nblogico, ptr, ptr, nblogico);
+
                 inodo->punterosDirectos[nblogico]=ptr; //asignamos la direción del bl. de datos en el inodo
         
-         printf(GRAY "\n[traducir_bloque_inodo()→ inodo.punterosDirectos[%i] = %i (reservado BF %i para BL %i)]\n"RESET,nblogico ,ptr, ptr, nblogico);
 
 
             }else{
                 buffer[indice]=ptr;  //asignamos la dirección del bloque de datos en el buffer
-                //printf(GRAY "[traducir_bloque_inodo()→ punteros_nivel%i [%i] = %i (reservado BF %i para BL %i)]\n" RESET, nivel_punteros, indice, ptr, ptr, nblogico);
-                printf(GRAY"[traducir_bloque_inodo()→ punteros_nivel%i[%i] = %i (reservado BF %i para BL %i)]\n"RESET,nRangoBL-1, indice, ptr, ptr, nblogico);
+                printf(GRAY"[traducir_bloque_inodo()→ punteros_nivel1[%i] = %i (reservado BF %i para BL %i)]\n\n"RESET, indice, ptr, ptr, nblogico);
                 if (bwrite(ptr_ant, buffer)<0){ //salvamos en el dispositivo el buffer de punteros modificado
                         fprintf(stderr, RED "Error al escribir en el buffer bwrite(ptr_ant, buffer) \n" RESET);
                         return FALLO;
