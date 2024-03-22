@@ -2,6 +2,84 @@
 #include "ficheros.h"
 
 /**
+ * Devuelve la cantidad de bytes escritos realmente 
+ * @param   ninodo  posición del inodo en el AI
+ * @param   buf_original  contiene el contenido que queremos escribir
+ * @param   offset  posición de escritura inicial en bytes lógicos
+ * @param   nbytes  número de bytes que queremos escribir
+**/
+
+int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offset, unsigned int nbytes){
+
+    unsigned int primerBL = offset/BLOCKSIZE;
+    unsigned int ultimoBL = (offset+nbytes-1)/BLOCKSIZE;
+
+    unsigned int desp1 = offset%BLOCKSIZE;
+    unsigned int desp2 = (offset+nbytes-1)%BLOCKSIZE;
+    unsigned char buf_bloque[BLOCKSIZE];
+
+    if(primerBL == ultimoBL){ // Cuando solo se escribe sobre un bloque
+        unsigned int nbfisico = traducir_bloque_inodo(&inodo,primerBL,1);
+        if(bread(nbfisico,buf_bloque)== FALLO){
+            fprintf(stderr, RED "Error al leer el bloque\n"RESET);
+            return FALLO;
+        }
+
+        memcpy(buf_bloque+desp1,buf_original,nbytes);
+        if(bwrite(nbytes, buf_bloque)<0){
+            fprintf(stderr, RED "Error al escribir en el bloque\n"RESET);
+            return FALLO;
+        }
+        return nbytes;
+
+    }else if (primerBL < ultimoBL){ // Cuando hay más de un bloque
+        // PRIMER PASO: Primer bloque lógico
+        unsigned int nbfisico = traducir_bloque_inodo(&inodo,primerBL,1);
+        if(bread(nbfisico,buf_bloque)== FALLO){
+            fprintf(stderr, RED "Error al leer el bloque\n"RESET);
+            return FALLO;
+        }
+
+        memcpy(buf_bloque + desp1, buf_original, BLOCKSIZE-desp1);
+    //    if(bwrite(nbfisico, buf_bloque)<0){
+            fprintf(stderr, RED "Error al escribir en el bloque\n"RESET);
+            return FALLO;
+        }
+
+        // SEGUNDO PASO: Bloques lógicos intermedios
+        if(bwrite(nbfisico, buf_original+(BLOCKSIZE-desp1)+(ultimoBL-primerBL-1)*BLOCKSIZE)<0){
+            fprintf(stderr, RED "Error al escribir en el bloque\n"RESET);
+            return FALLO;
+        }
+
+        // TERCER PASO: Último bloque lógico
+        nbfisico = traducir_bloque_inodo(&inodo, ultimoBL, 1);
+        if(bread(nbfisico,buf_bloque)== FALLO){
+            fprintf(stderr, RED "Error al leer el bloque\n"RESET);
+            return FALLO;
+        }
+
+        memcpy(buf_bloque, buf_original + (nbytes - (desp2 +1)), desp2 + 1);
+//        if(bwrite(nbfisico, buf_original+(BLOCKSIZE-desp1)+(ultimoBL-primerBL-1)*BLOCKSIZE)<0){
+            fprintf(stderr, RED "Error al escribir en el bloque\n"RESET);
+            return FALLO;
+        }
+    }
+
+    /*FALTA ACTUALIZAR:
+    tamEnBytesLog
+    mtime
+    ctime*/
+
+    /*if (escribir_inodo(ninodo,inodo)<0){
+        fprintf(stderr, "Error al salvar el inodo()\n"RESET);
+        return FALLO;
+    }*/
+
+    return nbytes;
+}
+ 
+/**
  * Devuelve la metainformación de un fichero/directorio correspondiente 
  * al inodo pasado.
  * @param   ninodo  posición del inodo en el AI
