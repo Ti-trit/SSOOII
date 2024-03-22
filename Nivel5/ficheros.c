@@ -78,7 +78,84 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
 
     return nbytes;
 }
- 
+
+/**
+ * @param   ninodo  posicion del inodo en el AI
+ * @param   buf_original    almacenará el contenido leido
+ * @param   offset posicion de lectura inicial en bytes logicos
+ * @param   nbytes  numero de bytes que queremos leer
+*/
+
+int mi_read_f(unsigned int inodo, void *buf_original, unsigned int offset, unsigned int nbytes){
+    //Comprobamos si tenemos permisos
+    if ((inodo.permisos&4) != 4){
+        fprintf(stderr, RED"No hay permisos de lectura\n"RESET);
+        return FALLO;
+    }
+    int leidos = 0;
+    //Comprobamos si podemos leer
+    if (offset >= inodo.tamEnBytesLog) {
+        return leidos
+    }
+
+    if ((offset+nbytes) >= inodo.tamEnBytesLog) {
+        nbytes = inodo.tamEnBytesLog-offset;
+    }
+    primerBL = offset/BLOCKSIZE;
+    ultimoBL = (offset+nbytes-1)/BLOCKSIZE;
+    desp1 = offset%BLOCKSIZE;
+    desp2 = (offset+nbytes-1)%BLOCKSIZE;
+
+    //PRIMER CASO 
+    if (primerBL == ultimoBL) {
+        unsigned int numero_bloque_fisico = traducir_bloque_inodo(&inodo, primerBL, 0);
+        leidos = bread(numero_bloque_fisico, buf_bloque);
+        if (leidos < 0) {
+            fprintf(stderr, RED"Error al leer el bloque fisico en mi_read_f()\n"RESET);
+            return FALLO;
+        }
+        memcpy(buf_original, buf_bloque+desp1, nbytes);
+        return nbytes;
+    }
+    //SEGUNDO CASO
+    else if (primerBL < ultimoBL) {
+        //Primer bloque logico
+        unsigned int numero_bloque_fisico = traducir_bloque_inodo(&inodo, primerBL, 0);
+        leidos = bread(numero_bloque_fisico, buf_bloque);
+        if (leidos < 0) {
+            fprintf(stderr, RED"Error al leer el bloque fisico en mi_read_f()\n"RESET);
+            return FALLO;
+        }
+        memcpy(buf_original, buf_bloque+desp1, BLOCKSIZE-desp1);
+        int bytes_copiados = BLOCKSIZE - desp1;
+
+        //Bloques intermedios
+        for (int i=primerBL+1; i < ultimoBL; i++) {
+            numero_bloque_fisico = traducir_bloque_inodo(&inodo, i, 0);
+            leidos = bread(numero_bloque_fisico, buf_bloque);
+            if (leidos < 0) {
+                fprintf(stderr, RED"Error al leer el bloque fisico en mi_read_f()\n"RESET);
+                return FALLO;
+            }
+            memcpy(buf_original + bytes_copiados, buf_bloque, BLOCKSIZE);
+            bytes_copiados += BLOCKSIZE;
+        }
+
+        //Ultimo bloque
+        numero_bloque_fisico = traducir_bloque_inodo(&inodo, ultimoBL, 0);
+        leidos = bread(numero_bloque_fisico, buf_bloque);
+        if (leidos < 0) {
+            fprintf(stderr, RED"Error al leer el bloque fisico en mi_read_f()\n"RESET);
+            return FALLO;
+        }
+        memcpy(buf_original + bytes_copiados, buf_bloque, desp2+1);
+        bytes_copiados += desp2 + 1;
+        
+    }
+
+    return bytes_copiados;
+}
+
 /**
  * Devuelve la metainformación de un fichero/directorio correspondiente 
  * al inodo pasado.
