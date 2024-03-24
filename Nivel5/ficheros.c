@@ -2,7 +2,7 @@
 #include "ficheros.h"
 
 /**
- * Escribe el conetenido de un buffer de tamaño nbytes en un fichero/directorio
+ * Escribe el contenido de un buffer de tamaño nbytes en un fichero/directorio
  * en la posición offset.  
  * @param   ninodo  posición del inodo en el AI
  * @param   buf_original  contiene el contenido que queremos escribir
