@@ -2,15 +2,18 @@
 #include "ficheros.h"
 
 /**
- * Devuelve la cantidad de bytes escritos realmente 
+ * Escribe el conetenido de un buffer de tamaño nbytes en un fichero/directorio
+ * en la posición offset.  
  * @param   ninodo  posición del inodo en el AI
  * @param   buf_original  contiene el contenido que queremos escribir
  * @param   offset  posición de escritura inicial en bytes lógicos
  * @param   nbytes  número de bytes que queremos escribir
+ * @return   cantidad de bytes escritos  
 **/
 
 int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offset, unsigned int nbytes){
-    //Verificamos que tenemos permisos de escritura
+        unsigned int bytes_escritos;
+        //Verificamos que tenemos permisos de escritura
         struct inodo inodo;
 
         //leer el inodo
@@ -22,65 +25,93 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
             fprintf(stderr, RED "No hay permisos de escritura\n" RESET);
        return FALLO;
         }
-    
+        
     unsigned int primerBL = offset/BLOCKSIZE;
     unsigned int ultimoBL = (offset+nbytes-1)/BLOCKSIZE;
-
+    unsigned int nbfisico;
     unsigned int desp1 = offset%BLOCKSIZE;
     unsigned int desp2 = (offset+nbytes-1)%BLOCKSIZE;
     unsigned char buf_bloque[BLOCKSIZE];
+    unsigned int bytestmp = 0;
 
+
+        nbfisico = traducir_bloque_inodo(&inodo,primerBL,1);
+        if (nbfisico==FALLO){
+            fprintf(stderr, RED "Error en traducir_bloque_inodo()"RESET);
+            return FALLO;
+        }
     if(primerBL == ultimoBL){ // Cuando solo se escribe sobre un bloque
-        unsigned int nbfisico = traducir_bloque_inodo(&inodo,primerBL,1);
+        //almacenamos el contenido de nbfisoc en buf_bloque
         if(bread(nbfisico,buf_bloque)== FALLO){
             fprintf(stderr, RED "Error al leer el bloque\n"RESET);
             return FALLO;
         }
 
         memcpy(buf_bloque+desp1,buf_original,nbytes);
-        if(bwrite(nbytes, buf_bloque)<0){
+
+        if(bwrite(nbfisico, buf_bloque)<0){
             fprintf(stderr, RED "Error al escribir en el bloque\n"RESET);
             return FALLO;
         }
-        return nbytes;
+       // return nbytes;
+       bytes_escritos=nbytes;
 
     }else if (primerBL < ultimoBL){ // Cuando hay más de un bloque
         // PRIMER PASO: Primer bloque lógico
-        unsigned int nbfisico = traducir_bloque_inodo(&inodo,primerBL,1);
+        
         if(bread(nbfisico,buf_bloque)== FALLO){
             fprintf(stderr, RED "Error al leer el bloque\n"RESET);
             return FALLO;
         }
 
         memcpy(buf_bloque + desp1, buf_original, BLOCKSIZE-desp1);
-    //    if(bwrite(nbfisico, buf_bloque)<0){
+        bytestmp=bwrite(nbfisico, buf_bloque); 
+        if(bytes_escritos<0){
             fprintf(stderr, RED "Error al escribir en el bloque\n"RESET);
             return FALLO;
         }
+        //acualizamos los bytes escritos
+        bytes_escritos-=bytestmp-desp1;
 
         // SEGUNDO PASO: Bloques lógicos intermedios
-        if(bwrite(nbfisico, buf_original+(BLOCKSIZE-desp1)+(ultimoBL-primerBL-1)*BLOCKSIZE)<0){
+        for (int i =primerBL+1; i<ultimoBL; i++){
+            bytestmp = bwrite(nbfisico, buf_original+(BLOCKSIZE-desp1)+(i-primerBL-1)*BLOCKSIZE);
+            if(bytestmp<0){
             fprintf(stderr, RED "Error al escribir en el bloque\n"RESET);
             return FALLO;
         }
+        //sumamos directamente porque son bloques completos
+        bytes_escritos+=bytestmp;
+
+        }
+        
 
         // TERCER PASO: Último bloque lógico
         nbfisico = traducir_bloque_inodo(&inodo, ultimoBL, 1);
+        if (nbfisico<0){
+             fprintf(stderr, RED "Error en traducir_bloque_inodo()"RESET);
+            return FALLO;
+
+        }
         if(bread(nbfisico,buf_bloque)== FALLO){
             fprintf(stderr, RED "Error al leer el bloque\n"RESET);
             return FALLO;
         }
 
         memcpy(buf_bloque, buf_original + (nbytes - (desp2 +1)), desp2 + 1);
-//        if(bwrite(nbfisico, buf_original+(BLOCKSIZE-desp1)+(ultimoBL-primerBL-1)*BLOCKSIZE)<0){
+        bytestmp=bwrite(nbfisico, buf_original+(BLOCKSIZE-desp1)+(ultimoBL-primerBL-1)*BLOCKSIZE);
+        if(bytestmp<0){
             fprintf(stderr, RED "Error al escribir en el bloque\n"RESET);
             return FALLO;
         }
+        bytes_escritos+=desp2+1;
     }
 
   
-        if (inodo.tamEnBytesLog<=offset+nbytes-1){
-            inodo.tamEnBytesLog=nbytes+offset-1;
+     //actaulizamos solo si hemos escrito más allá del final del fichero
+
+        if (inodo.tamEnBytesLog<offset+nbytes){
+            inodo.tamEnBytesLog=nbytes+offset;
                 inodo.ctime=time(NULL);
 
         }
@@ -92,7 +123,7 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
         return FALLO;
     }
 
-    return nbytes;
+    return bytes_escritos;
 }
 
 /**
