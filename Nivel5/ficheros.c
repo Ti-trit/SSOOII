@@ -10,7 +10,19 @@
 **/
 
 int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offset, unsigned int nbytes){
+    //Verificamos que tenemos permisos de escritura
+        struct inodo inodo;
 
+        //leer el inodo
+        if (leer_inodo(ninodo, &inodo)==FALLO){
+                fprintf(stderr, RED"Error al leer el inodo" RESET);
+                return FALLO;
+        }
+        if ((inodo.permisos&2)!=2){
+            fprintf(stderr, RED "No hay permisos de escritura\n" RESET);
+       return FALLO;
+        }
+    
     unsigned int primerBL = offset/BLOCKSIZE;
     unsigned int ultimoBL = (offset+nbytes-1)/BLOCKSIZE;
 
@@ -66,15 +78,19 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
         }
     }
 
-    /*FALTA ACTUALIZAR:
-    tamEnBytesLog
-    mtime
-    ctime*/
+  
+        if (inodo.tamEnBytesLog<=offset+nbytes-1){
+            inodo.tamEnBytesLog=nbytes+offset-1;
+                inodo.ctime=time(NULL);
 
-    /*if (escribir_inodo(ninodo,inodo)<0){
+        }
+    inodo.mtime== time(NULL);
+
+
+    if (escribir_inodo(ninodo,&inodo)<0){
         fprintf(stderr, "Error al salvar el inodo()\n"RESET);
         return FALLO;
-    }*/
+    }
 
     return nbytes;
 }
@@ -87,6 +103,11 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
 */
 
 int mi_read_f(unsigned int inodo, void *buf_original, unsigned int offset, unsigned int nbytes){
+       struct inodo inodo;
+        if (leer_inodo(ninodo, &inodo)==FALLO){
+            fprintf(stderr, RED"Error al leer el inodo" RESET);
+            return FALLO;
+        }
     //Comprobamos si tenemos permisos
     if ((inodo.permisos&4) != 4){
         fprintf(stderr, RED"No hay permisos de lectura\n"RESET);
