@@ -42,7 +42,7 @@ int main(int argc, char const *argv[])
             fprintf(stderr, RED "Error en mi_write_f() (escribir.c\n" RESET);
             return FALLO;
         }
-        int tamaño =strlen(argv[2]);
+        /*int tamaño =strlen(argv[2]);
         char buf[tamaño];
        
         if(memset(buf, 0, strlen(argv[2])) == NULL){
@@ -56,7 +56,7 @@ int main(int argc, char const *argv[])
             return FALLO;
         }
         fprintf(stdout, "Bytes leídos: %u\n", bytesLeidos);
-        
+        */
         struct STAT stat;
         if (mi_stat_f(ninodo, &stat) == FALLO)
         {
