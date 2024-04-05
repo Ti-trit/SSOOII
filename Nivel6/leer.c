@@ -24,7 +24,7 @@ int main(int argc, const char *argv[]) {
     if (bread(0, &SB) == FALLO)
     {
         fprintf(stderr, RED"leer.c: Error de lectura del superbloque.\n"RESET);
-        return EXIT_FAILURE;
+        return FALLO;
     }
 
 
