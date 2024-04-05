@@ -2,18 +2,16 @@
 
 #define tambuffer 1500 //Tamaño del buffer de lectura
 
-int main(int argc, const char *argv[]) {
+int main(int argc, char const *argv[]) {
 
     if (argc!=3){
         fprintf(stderr, RED "Sintaxis: permitir <nombre_dispositivo> <ninodo>\n"RESET);
         return FALLO;
     }
 
-    //const char dispositivo = argv[1];
     int ninodo = atoi(argv[2]);
     
     //montar el dispositivo
-
     if (bmount(argv[1])==FALLO){
           fprintf(stderr, RED "Se ha producido un error al montar el dispositivo(leer.c).\n"RESET);
             return FALLO;
