@@ -43,9 +43,16 @@ int main(int argc, int **argv) {
         }
     }
 
-    char string[128];
-    sprintf(string, "bytes leídos %d\n", numBytesLeidos);
-    write(2, string, strlen(string));
+   struct inodo inodo;
+    if (leer_inodo(ninodo, &inodo) == FALLO)
+    {
+        fprintf(stderr, "Error main leer_inodo");
+        return FALLO;
+    }
+        char string[128];
+        sprintf(string, "\ntotal_leidos: %d\ntamEnBytesLog: %d\n", bytesLeidos, inodo.tamEnBytesLog);
+        write(2, string, strlen(string));
+  
     if (bumount() == FALLO) {
         fprintf(stderr, "Error main bumount");
         return FALLO;
