@@ -629,11 +629,11 @@ int obtener_indice(unsigned int nblogico, int nivel_punteros){
  * @return  el bloque fisico deseado o FALLO si la traducción no fue existosa
 */
 
+
 int traducir_bloque_inodo(struct inodo *inodo, unsigned int nblogico, unsigned char reservar){
     unsigned int ptr, ptr_ant; 
     int nRangoBL, nivel_punteros, indice;
     unsigned int buffer[NPUNTEROS];
-
 
     ptr = 0; ptr_ant=0;
      nRangoBL = obtener_nRangoBL(inodo, nblogico, &ptr); //0:D, 1:I0, 2:I1, 3:I2
@@ -657,11 +657,13 @@ int traducir_bloque_inodo(struct inodo *inodo, unsigned int nblogico, unsigned c
                     fprintf(stderr, RED"Error de reservar_bloque() en traduicr_bloque_inodo\n"RESET);
                     return FALLO;
                 }
-                inodo->numBloquesOcupados++;
+               // inodo->numBloquesOcupados++;
+                inodo->numBloquesOcupados = inodo->numBloquesOcupados+1;
+
                 inodo->ctime = time(NULL); //actualizar el ctime ya que estamos modificando datos del inodo
                     //el bloque cuelga directamente del inodo
                 if (nivel_punteros==nRangoBL){
-                    #if DEBUGN4
+                    #if DEBUGN5
                 printf(GRAY "\n[traducir_bloque_inodo()→ inodo.punterosIndirectos[%i] = %i (reservado BF %i para punteros_nivel%i)]\n"RESET, nRangoBL - 1, ptr, ptr, nivel_punteros);
                     #endif
                     inodo->punterosIndirectos[nRangoBL-1]=ptr;
@@ -669,7 +671,7 @@ int traducir_bloque_inodo(struct inodo *inodo, unsigned int nblogico, unsigned c
                 }else{
                     // el bloque cuelga de otro bloque de punteros
                     buffer[indice]=ptr;
-                     #if DEBUGN4
+                     #if DEBUGN5
                 printf(GRAY"[traducir_bloque_inodo()→ punteros_nivel%i[%i] = %i (reservado BF %i para punteros_nivel%i)]\n"RESET, nivel_punteros+1, indice, ptr, ptr, nivel_punteros);
                     #endif
 
@@ -715,10 +717,10 @@ int traducir_bloque_inodo(struct inodo *inodo, unsigned int nblogico, unsigned c
                     fprintf(stderr, RED"Error de reservar_bloque() en traduicr_bloque_inodo\n"RESET);
                     return FALLO;
                 }
-            inodo->numBloquesOcupados++;
+            inodo->numBloquesOcupados = inodo->numBloquesOcupados+1;
             inodo->ctime= time (NULL);
             if (nRangoBL==0){//puntero directo
-            #if DEBUGN4
+            #if DEBUGN5
             printf(GRAY"\n[traducir_bloque_inodo()→ punterosDirectos[%i] = %i (reservado BF %i para BL %i)]\n"RESET, nblogico, ptr, ptr, nblogico);
             #endif    
                 inodo->punterosDirectos[nblogico]=ptr; //asignamos la direción del bl. de datos en el inodo
@@ -727,7 +729,7 @@ int traducir_bloque_inodo(struct inodo *inodo, unsigned int nblogico, unsigned c
 
             }else{
                 buffer[indice]=ptr;  //asignamos la dirección del bloque de datos en el buffer
-                #if DEBUGN4
+                #if DEBUGN5
                 printf(GRAY"[traducir_bloque_inodo()→ punteros_nivel1[%i] = %i (reservado BF %i para BL %i)]\n\n"RESET, indice, ptr, ptr, nblogico);
                #endif
                 if (bwrite(ptr_ant, buffer)<0){ //salvamos en el dispositivo el buffer de punteros modificado
@@ -739,7 +741,12 @@ int traducir_bloque_inodo(struct inodo *inodo, unsigned int nblogico, unsigned c
             }
         }
     }
+ 
+    //mi_write_f salvará los cambios del inodo
+
+    
     return ptr;
 
 
 }
+
