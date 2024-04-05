@@ -19,31 +19,36 @@ int main(int argc, int **argv) {
             return FALLO;
     }
 
-    memset(buffer_texto,0,tambuffer);
     int offset = 0;
+    char buffer_texto[tambuffer];
     int numBytesLeidos = 0;
     int leidos = 0;
-
-    if (leidos = mi_read_f(ninodo, buffer_texto, offset, tambuffer) < 0){
+    memset(buffer_texto,0,tambuffer);
+        //obtener los bytes leedos
+    leidos = mi_read_f(ninodo, buffer_texto, offset, tambuffer)
+    if ( leidos < 0){
         fprintf(stderr, RED"Se ha producido un error al leer el bloque\n"RESET);
         return FALLO;
     }
-    numBytesLeidos += leidos;
+    //numBytesLeidos += leidos;
     
     while (leidos > 0) {
+        numBytesLeidos += leidos;
         write(1, buffer_texto, leidos);
         memset(buffer_texto,0,tambuffer);
-
         offset += tambuffer;
         if (leidos = mi_read_f(ninodo, buffer_texto, offset, tambuffer) < 0){
             fprintf(stderr, RED"Se ha producido un error al leer el bloque\n"RESET);
             return FALLO;
         }
-        numBytesLeidos += leidos;
     }
 
     char string[128];
     sprintf(string, "bytes leídos %d\n", numBytesLeidos);
     write(2, string, strlen(string));
-
+    if (bumount() == FALLO) {
+        fprintf(stderr, "Error main bumount");
+        return FALLO;
+    }
+return EXITO;
 }
