@@ -2,14 +2,14 @@
 
 #define tambuffer 1500 //Tamaño del buffer de lectura
 
-int main(int argc, int **argv) {
+int main(int argc, char const*argv[]) {
 
-    if (argc=!3){
+    if (argc!=3){
         fprintf(stderr, RED "Sintaxis: permitir <nombre_dispositivo> <ninodo>\n"RESET);
         return FALLO;
     }
 
-    unsigned char dispositivo = argv[1];
+    //const char dispositivo = argv[1];
     int ninodo = atoi(argv[2]);
     
     //montar el dispositivo
@@ -46,7 +46,9 @@ int main(int argc, int **argv) {
         write(1, buffer_texto, leidos);
         memset(buffer_texto,0,tambuffer);
         offset += tambuffer;
-        if (leidos = mi_read_f(ninodo, buffer_texto, offset, tambuffer) < 0){
+        leidos = mi_read_f(ninodo, buffer_texto, offset, tambuffer) ;
+
+        if (leidos < 0){
             fprintf(stderr, RED"Se ha producido un error al leer el bloque\n"RESET);
             return FALLO;
         }
