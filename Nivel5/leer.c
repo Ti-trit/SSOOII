@@ -9,7 +9,7 @@ int main(int argc, const char *argv[]) {
         return FALLO;
     }
 
-    //const char dispositivo = argv[1];
+    const char dispositivo = argv[1];
     int ninodo = atoi(argv[2]);
     
     //montar el dispositivo
