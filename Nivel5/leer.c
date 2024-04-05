@@ -2,7 +2,7 @@
 
 #define tambuffer 1500 //Tamaño del buffer de lectura
 
-int main(int argc, char const*argv[]) {
+int main(int argc, const char *argv[]) {
 
     if (argc!=3){
         fprintf(stderr, RED "Sintaxis: permitir <nombre_dispositivo> <ninodo>\n"RESET);
