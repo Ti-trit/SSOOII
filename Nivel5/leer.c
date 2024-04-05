@@ -9,9 +9,11 @@ int main(int argc, char const *argv[]) {
         return FALLO;
     }
 
+    //const char dispositivo = argv[1];
     int ninodo = atoi(argv[2]);
     
     //montar el dispositivo
+
     if (bmount(argv[1])==FALLO){
           fprintf(stderr, RED "Se ha producido un error al montar el dispositivo(leer.c).\n"RESET);
             return FALLO;
@@ -33,10 +35,10 @@ int main(int argc, char const *argv[]) {
     memset(buffer_texto,0,tambuffer);
         //obtener los bytes leIdos
     leidos = mi_read_f(ninodo, buffer_texto, offset, tambuffer);
-    if ( leidos < 0){
+    /*if ( leidos < 0){
         fprintf(stderr, RED"Se ha producido un error al leer el bloque\n"RESET);
         return FALLO;
-    }
+    }*/
     
     while (leidos > 0) {
         numBytesLeidos += leidos;
@@ -45,10 +47,10 @@ int main(int argc, char const *argv[]) {
         offset += tambuffer;
         leidos = mi_read_f(ninodo, buffer_texto, offset, tambuffer) ;
 
-        if (leidos < 0){
+        /*if (leidos < 0){
             fprintf(stderr, RED"Se ha producido un error al leer el bloque\n"RESET);
             return FALLO;
-        }
+        }*/
     }
 
    struct inodo inodo;
@@ -61,6 +63,8 @@ int main(int argc, char const *argv[]) {
         char string[128];
         sprintf(string, "\ntotal_leidos: %d\ntamEnBytesLog: %d\n", numBytesLeidos, inodo.tamEnBytesLog);
         write(2, string, strlen(string));
+       // fprintf(stderr, "total_leidos: %d\ntamEnBytesLog: %d\n", numBytesLeidos, inodo.tamEnBytesLog);
+
   
     if (bumount() == FALLO) {
         fprintf(stderr, RED"Error al desmontar el dispositivo.\n"RESET);
