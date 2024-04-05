@@ -15,9 +15,18 @@ int main(int argc, int **argv) {
     //montar el dispositivo
 
     if (bmount(dispositivo)==FALLO){
-          fprintf(stderr, RED "Se ha producido un error al montar el dispositivo.\n"RESET);
+          fprintf(stderr, RED "Se ha producido un error al montar el dispositivo(leer.c).\n"RESET);
             return FALLO;
     }
+
+    struct superbloque SB;
+    //Leer superbloque
+    if (bread(0, &SB) == FALLO)
+    {
+        fprintf(stderr, RED"leer.c: Error de lectura del superbloque.\n"RESET);
+        return EXIT_FAILURE;
+    }
+
 
     int offset = 0;
     char buffer_texto[tambuffer];
@@ -25,7 +34,7 @@ int main(int argc, int **argv) {
     int leidos = 0;
     memset(buffer_texto,0,tambuffer);
         //obtener los bytes leedos
-    leidos = mi_read_f(ninodo, buffer_texto, offset, tambuffer)
+    leidos = mi_read_f(ninodo, buffer_texto, offset, tambuffer);
     if ( leidos < 0){
         fprintf(stderr, RED"Se ha producido un error al leer el bloque\n"RESET);
         return FALLO;
@@ -49,8 +58,9 @@ int main(int argc, int **argv) {
         fprintf(stderr, "Error main leer_inodo");
         return FALLO;
     }
+
         char string[128];
-        sprintf(string, "\ntotal_leidos: %d\ntamEnBytesLog: %d\n", bytesLeidos, inodo.tamEnBytesLog);
+        sprintf(string, "\ntotal_leidos: %d\ntamEnBytesLog: %d\n", numBytesLeidos, inodo.tamEnBytesLog);
         write(2, string, strlen(string));
   
     if (bumount() == FALLO) {
