@@ -361,3 +361,49 @@ int mi_chmod_f(unsigned int ninodo, unsigned char permisos)
     }
     return EXITO;
 }
+
+int mi_truncar_f(unsigned int ninodo, unsigned int nbytes) {
+    struct inodo inodo;
+
+    if (leer_inodo(ninodo, &inodo) == FALLO) {
+        fprintf(stderr, RED"Error al leer el inodo en mi_truncar_f()\n" RESET);
+        return FALLO;
+    }
+    // Comprobamos si tenemos permisos de escritura
+    if ((inodo.permisos & 4) != 4)
+    {
+        fprintf(stderr, RED "No hay permisos de lectura\n" RESET);
+        return FALLO;
+    }
+
+    //Comprobamos que no se trunca más allá del tamaño del fichero 
+    if (nbytes > inodo.tamEnBytesLog) {
+        fprintf(stderr, RED "Error ya que nbytes > tamEnBytesLog\n" RESET);
+        return FALLO;
+    }
+
+    //Determinamos el primer bloque logico
+    unsigned int primerBL;
+    if (nbytes % BLOCKSIZE == 0) {
+        primerBL = nbytes / BLOCKSIZE;
+    } else {
+        primerBL = (nbytes / BLOCKSIZE) + 1;
+    }
+
+    int bloquesLiberados = liberar_bloques_inodo(primerBL, &inodo);
+
+    //Actualizamos el tamaño del inodo y los tiempos
+    inodo.tamEnBytesLog = nbytes;
+    inodo.ctime = time(NULL);
+    inodo.mtime = time(NULL);
+    inodo.numBloquesOcupados -= bloquesLiberados;
+
+    if (escribir_inodo(ninodo, inodo) == FALLO) {
+        fprintf(stderr, RED"Error al escribir el inodo actualizado en mi_truncar_f()\n"RESET);
+        return FALLO;
+    }
+
+    return bloquesLiberados;
+
+
+}
