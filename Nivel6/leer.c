@@ -2,7 +2,7 @@
 
 #define tambuffer 1500 //Tamaño del buffer de lectura
 
-int main(int argc, const char *argv[]) {
+int main(int argc, char const *argv[]) {
 
     if (argc!=3){
         fprintf(stderr, RED "Sintaxis: permitir <nombre_dispositivo> <ninodo>\n"RESET);
@@ -35,10 +35,10 @@ int main(int argc, const char *argv[]) {
     memset(buffer_texto,0,tambuffer);
         //obtener los bytes leIdos
     leidos = mi_read_f(ninodo, buffer_texto, offset, tambuffer);
-    if ( leidos < 0){
+    /*if ( leidos < 0){
         fprintf(stderr, RED"Se ha producido un error al leer el bloque\n"RESET);
         return FALLO;
-    }
+    }*/
     
     while (leidos > 0) {
         numBytesLeidos += leidos;
@@ -47,10 +47,10 @@ int main(int argc, const char *argv[]) {
         offset += tambuffer;
         leidos = mi_read_f(ninodo, buffer_texto, offset, tambuffer) ;
 
-        if (leidos < 0){
+        /*if (leidos < 0){
             fprintf(stderr, RED"Se ha producido un error al leer el bloque\n"RESET);
             return FALLO;
-        }
+        }*/
     }
 
    struct inodo inodo;
@@ -63,6 +63,8 @@ int main(int argc, const char *argv[]) {
         char string[128];
         sprintf(string, "\ntotal_leidos: %d\ntamEnBytesLog: %d\n", numBytesLeidos, inodo.tamEnBytesLog);
         write(2, string, strlen(string));
+       // fprintf(stderr, "total_leidos: %d\ntamEnBytesLog: %d\n", numBytesLeidos, inodo.tamEnBytesLog);
+
   
     if (bumount() == FALLO) {
         fprintf(stderr, RED"Error al desmontar el dispositivo.\n"RESET);
