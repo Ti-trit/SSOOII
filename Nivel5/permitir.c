@@ -1,20 +1,20 @@
-#include "ficheros_basico.h"
+#include "ficheros.h"
 
 
-int main(int argc, char **argv){
+int main(int argc, char *argv[]){
 
 
-    if (argc=!4){
+    if (argc!=4){
         fprintf(stderr, RED "Sintaxis: permitir <nombre_dispositivo> <ninodo> <permisos>\n"RESET);
         return FALLO;
     }
-    unsigned char dispositivo = argv[1];
+    // const char dispositivo = argv[1];
     int ninodo = atoi(argv[2]);
-    unsigned char permisos = argv[3];
+     char permisos = atoi(argv[3]);
 
     //montar el dispositivo
 
-    if (bmount(dispositivo)==FALLO){
+    if (bmount(argv[1])==FALLO){
           fprintf(stderr, RED "Se ha producido un error al montar el dispositivo.\n"RESET);
             return FALLO;
     }
@@ -27,7 +27,7 @@ int main(int argc, char **argv){
 
     //desmontar el dispositivo
 
-    if (bumount(dispositivo)==FALLO){
+    if (bumount(argv[1])==FALLO){
          fprintf(stderr, RED"Error al desmontar el dispositivo.\n" RESET);
     return FALLO;
     }

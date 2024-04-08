@@ -154,6 +154,7 @@ int main(int argc, char **argv){
     printf("numBloquesOcupados: %i\n", inodo_raiz->numBloquesOcupados);
     #endif
     //reservar inodos
+    #if DEBUGN4
     int inodoResv = reservar_inodo('f', 6);
         struct inodo inodo;
      if (leer_inodo(inodoResv,&inodo)<0){
@@ -164,6 +165,7 @@ int main(int argc, char **argv){
        fprintf(stderr, RED"Error al leer el superbloque\n" RESET);
       return FALLO;
     }
+    
     printf("\nINODO 1. TRADUCCION DE LOS BLOQUES LOGICOS 8, 204, 30.004, 400.004 y 468.750\n");
 
     if (traducir_bloque_inodo(&inodo, 8, 1)<0){
@@ -211,6 +213,7 @@ int main(int argc, char **argv){
     printf("\nnumBloquesOcupados: %i\n", inodo.numBloquesOcupados);
 
     printf("SB.posPrimerInodoLibre = %i\n", SB.posPrimerInodoLibre);
+   
     //------------------------------------------------------------------------------------
     struct inodo inodos [BLOCKSIZE/INODOSIZE];
     int conInodos = 0;
@@ -242,6 +245,7 @@ int main(int argc, char **argv){
     }
     }
     }
+     #endif
 
 
       //Desmontar el dispositivo virtual

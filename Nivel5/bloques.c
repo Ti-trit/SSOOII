@@ -53,7 +53,7 @@ int bwrite(unsigned int nbloque, const void *buf){
 int pos = nbloque*BLOCKSIZE;//poisicon del bloque
 
 if (lseek(descriptor, pos, SEEK_SET)<0){   //posicionar el puntero dentro del bloque
-    fprintf(stderr, RED NEGRITA"Error al posicionar el puntero.\n"RESET);
+    fprintf(stderr, RED NEGRITA"Error al posicionar el puntero en bwrite().\n"RESET);
     return FALLO;
 }
 //Escribir en el bloque
@@ -72,13 +72,13 @@ if (nbytes<0){
  * Lee 1 bloque del dispositivo virtual, correspondiente al físico nbloque.
  * @param nbloque     posición virtual del bloque
  * @param buf         buffer de memoria cuyo contenido intentaremos leer
- * @return              número de bytes leedos.FALLO en caso de error 
+ * @return             número de bytes leedos.FALLO en caso de error 
 */
 int bread(unsigned int nbloque, void*buf){
     int pos = nbloque*BLOCKSIZE;// Posición inicial
 
     if (lseek(descriptor, pos, SEEK_SET)<0){
-        fprintf(stderr, RED NEGRITA"Error al posicionar el puntero.\n"RESET);
+        fprintf(stderr, RED NEGRITA"Error al posicionar el puntero en bread().\n"RESET);
         return FALLO; // Error al posicionar el puntero
     }
 
