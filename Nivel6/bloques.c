@@ -87,7 +87,7 @@ int bread(unsigned int nbloque, void*buf){
     if(nbytes>=0){
         return nbytes; // Devuelve nbytes == BLOCKSIZE
     }else{
-        fprintf(stderr, RED NEGRITA"Error al leer en el bloque %i.\n"RESET, nbloque);
+        fprintf(stderr, RED NEGRITA"bread: Error al leer en el bloque %i.\n"RESET, nbloque);
         return FALLO; // Salta un error en el bloque "nbloque"
     }
     return EXITO;

@@ -15,6 +15,7 @@
 #define DEBUGN3   0
 #define DEBUGN4   0
 #define DEBUGN5   1
+#define DEBUGN6   1
 //Metodos
 
 
@@ -74,7 +75,6 @@ struct inodo {     // comprobar que ocupa 128 bytes haciendo un sizeof(inodo)!!!
 
 
 //Funciones 
-//Nivel2
 int tamMB(unsigned int nbloques);
 int tamAI(unsigned int ninodos);
 int initSB(unsigned int nbloques, unsigned int ninodos);
@@ -90,5 +90,5 @@ int reservar_inodo(unsigned char tipo, unsigned char permisos);
 int obtener_nRangoBL(struct inodo *inodo, unsigned int nblogico, unsigned int *ptr); 
 int obtener_indice(unsigned int nblogico, int nivel_punteros);
 int traducir_bloque_inodo(struct inodo *inodo, unsigned int nblogico, unsigned char reservar);
-
-
+int liberar_bloques_inodo(unsigned int primerBL, struct inodo *inodo);
+int liberar_inodo(unsigned int ninodo);
