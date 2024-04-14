@@ -1,5 +1,4 @@
-#include "ficheros_basico.h"
-
+#include "directorios.h"
         
 
 int main(int argc, char **argv){
@@ -247,6 +246,16 @@ int main(int argc, char **argv){
     }
      #endif
 
+  char *caminos[] = {"pruebas/","/pruebas/" , "/pruebas/docs/", "/pruebas/", "/pruebas/docs/", "/pruebas/docs/doc1", "/pruebas/docs/doc1/doc11", "/pruebas/", "/pruebas/docs/doc1", "/pruebas/docs/doc1", "/pruebas/casos/", "/pruebas/docs/doc2"};
+  for (int i =0; i<sizeof(caminos)/sizeof(char); i++){
+    int reservar =1;
+    if (i==1 || i == 9){
+      reservar = 0;
+    }
+    mostrar_buscar_entrada(caminos[i], reservar);
+  }
+
+     
 
       //Desmontar el dispositivo virtual
  if (bumount(argv[1])<0){
@@ -257,3 +266,20 @@ int main(int argc, char **argv){
 
   return EXITO;
 }
+
+void mostrar_buscar_entrada(char *camino, char reservar){
+  unsigned int p_inodo_dir=0,  p_inodo=0, p_entrada=0;
+  int error;
+    printf("\ncamino: %s, reservar: %d\n", camino, reservar);
+    error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, reservar, 6);
+    if (error<0){
+      mostrar_error_buscar_entrada(error);
+      //perror();
+
+    }
+
+  printf("**********************************************************************\n");
+  return EXITO;
+
+}
+
