@@ -1,7 +1,6 @@
 #include "directorios.h"
 /**
- * @brief Función que separa una cadena en dos partes, donde la parte inicial representa
- * un directorio.
+ * @brief Función que separa una cadena(que empieza por /) en dos partes,  inicial y final.
  * @param   camino    cadena a separar
  * @param   inicial   parte inicial obtenido de camino
  * @param   final     resta de la cadena camino
