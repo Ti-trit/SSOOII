@@ -396,5 +396,57 @@ int mi_chmod(const char *camino, unsigned char permisos){
 
 }
 
+/**
+ * @param   camino  directorio
+ * @param   permisos  permisos del directorio
+ * @return  EXITO/FALLO
+*/
+
+int mi_creat(const char *camino, unsigned char permisos) {
+    unsigned int p_inodo_dir=0, p_inodo=0, p_entrada=0;
+    int error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 1, permisos);
+    if (error < 0) {
+        return error;
+    }
+
+    return EXITO;
+}
+
+/**
+ * @param camino directorio
+ * @param p_stat estructura estado 
+ * @return 
+*/
+
+int mi_stat(const char *camino, struct STAT *p_stat) {
+    unsigned int p_inodo_dir=0, p_inodo=0, p_entrada=0;
+    int error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 1, permisos);
+    if (error < 0) {
+        return error;
+    }
+
+    if (mi_stat_f(p_inodo, p_stat) < 0){
+        return FALLO;
+    } 
+
+    printf("Nº de inodo: %i\n", p_inodo) 
+    printf("tipo: %c\n",inodo.tipo);
+    printf("permisos: %i\n", inodo.permisos);
+
+    ts = localtime(&inodo.atime);
+    strftime(atime, sizeof(atime), "%a %Y-%m-%d %H:%M:%S", ts);
+     ts = localtime(&inodo.mtime);
+    strftime(mtime, sizeof(mtime), "%a %Y-%m-%d %H:%M:%S", ts);
+    ts = localtime(&inodo.ctime);
+    strftime(ctime, sizeof(ctime), "%a %Y-%m-%d %H:%M:%S", ts);
+
+    // Imprime los tiempos del inodo en la salida estándar.
+    printf("atime: %s \nmtime: %s \nctime: %s\n", atime, mtime, ctime);
+
+    printf("nlinks: %i\n", inodo.nlinks);
+    printf("tamEnBytesLog: %i\n", inodo.tamEnBytesLog);
+    printf("\nnumBloquesOcupados: %i\n", inodo.numBloquesOcupados);
+
+}
 
 
