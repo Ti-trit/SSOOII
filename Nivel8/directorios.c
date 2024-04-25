@@ -418,7 +418,7 @@ int mi_creat(const char *camino, unsigned char permisos) {
  * @return 
 */
 
-int mi_stat(const char *camino, struct STAT *p_stat) {
+int mi_stta(const char *camino, struct STAT *p_stat) {
     unsigned int p_inodo_dir=0, p_inodo=0, p_entrada=0;
     int error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 1, permisos);
     if (error < 0) {
