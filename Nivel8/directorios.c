@@ -418,20 +418,37 @@ int mi_creat(const char *camino, unsigned char permisos) {
  * @return 
 */
 
-int mi_stta(const char *camino, struct STAT *p_stat) {
+
+int mi_stat(const char *camino, struct STAT *p_stat) {
     unsigned int p_inodo_dir=0, p_inodo=0, p_entrada=0;
-    int error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 1, permisos);
+    int error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 1, 4);
     if (error < 0) {
         return error;
     }
 
-    if (mi_stat_f(p_inodo, p_stat) < 0){
-        return FALLO;
-    } 
 
-    printf("Nº de inodo: %i\n", p_inodo) 
+//si la entrada ya existe
+
+        if (error == ERROR_ENTRADA_YA_EXISTENTE){
+        if (mi_stat_f(p_inodo, p_stat) < 0){
+        return FALLO;
+         } 
+        }
+
+        struct inodo inodo; 
+        if (leer_inodo(p_inodo, &inodo)==FALLO){
+            fprintf(stderr, RED "mi_stat:Error al leer el inodo\n "RESET);
+            return FALLO;
+        }
+
+    printf("Nº de inodo: %i\n", p_inodo); 
     printf("tipo: %c\n",inodo.tipo);
     printf("permisos: %i\n", inodo.permisos);
+
+    struct tm *ts;
+    char atime[80];
+    char mtime[80];
+    char ctime[80];
 
     ts = localtime(&inodo.atime);
     strftime(atime, sizeof(atime), "%a %Y-%m-%d %H:%M:%S", ts);
@@ -448,5 +465,3 @@ int mi_stta(const char *camino, struct STAT *p_stat) {
     printf("\nnumBloquesOcupados: %i\n", inodo.numBloquesOcupados);
 
 }
-
-
