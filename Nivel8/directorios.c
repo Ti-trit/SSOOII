@@ -288,17 +288,16 @@ int buscar_entrada(const char *camino_parcial, unsigned int *p_inodo_dir, unsign
 */
 int mi_dir(const char *camino, char *buffer, char tipo){
 
-int entradas_leidas = 0;
 unsigned int p_inodo_dir=0, p_inodo=0, p_entrada=0;
-int entradas_leidas=0;
 int err =buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada,0, 4 );
 if (err<0){
-        return err;
+    mostrar_error_buscar_entrada(err);
+        return FALLO;
 }
 
 struct inodo inodo;
 if (leer_inodo(p_inodo, &inodo)==FALLO){
-        fprintf(stderr, RED "mi_dir: Error al leer el inodo %ls"RESET, p_inodo);
+        fprintf(stderr, RED "mi_dir: Error al leer el inodo %d"RESET, p_inodo);
         return FALLO;
 }
 if ((inodo.permisos & 4)!= 4){
@@ -307,28 +306,30 @@ if ((inodo.permisos & 4)!= 4){
 }
 
 if (inodo.tipo != tipo){
-    fprintf(stderr, RED "tipo incorrecto\n" RESET); return FALLO;
+    fprintf(stderr, RED "Error: la sintaxis no concuerda con el tipo\n" RESET); return FALLO;
 }
 int Nentradas = inodo.tamEnBytesLog/sizeof(struct entrada);
-struct entrada buffer_entradas[Nentradas];
+//struct entrada buffer_entradas[Nentradas];
+struct entrada Entradas[BLOCKSIZE/sizeof(struct entrada)];
+int offset= 0;
 
-
-int returnVALUE = mi_read_f(p_inodo, buffer_entradas,0,BLOCKSIZE);
-if (returnVALUE==FALLO){
+ offset = mi_read_f(p_inodo, Entradas,0,BLOCKSIZE);
+if (offset==FALLO){
     fprintf(stderr, RED "mi_dir: Error en mi read()\n"RESET);return FALLO;
 }
 
 for (int i =0; i<Nentradas; i++){
-    if (leer_inodo(buffer_entradas[i].ninodo, &inodo)==FALLO){
-        fprintf(stderr, RED "mi_dir: Error al leer el inodo %ls"RESET, buffer_entradas[i].ninodo);return FALLO;
+    if (leer_inodo(Entradas[i%(BLOCKSIZE/sizeof(struct entrada))].ninodo, &inodo)==FALLO){
+        fprintf(stderr, RED "mi_dir: Error al leer el inodo "RESET);return FALLO;
     }
 //obtener la info de cada inodo
 
     
     if(inodo.tipo == 'd'){
-
+        strcat(buffer, BLUE);
         strcat(buffer, "d");
     }else{
+        strcat(buffer, GREEN);
         strcat(buffer, "f");
     }
 
@@ -336,6 +337,7 @@ for (int i =0; i<Nentradas; i++){
     strcat(buffer, "\t");
 
     //permisos
+    strcat(buffer, MAGENTA);
     strcat(buffer, (inodo.permisos & 4) ? "r" : "-");
     strcat(buffer, (inodo.permisos & 2) ? "w" : "-");
     strcat(buffer, (inodo.permisos & 1) ? "x" : "-");
@@ -347,30 +349,32 @@ for (int i =0; i<Nentradas; i++){
      char tmp[64];
        tm = localtime(&inodo.mtime);
        sprintf(tmp, "%d-%02d-%02d %02d:%02d:%02d", tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min,  tm->tm_sec);
-       strcat(buffer_entradas, tmp);
+       strcat(buffer, tmp);
         strcat(buffer, "\t");
 
         //tamaño
+        strcat(buffer, YELLOW);
         char tamEnBytesLog[16];
         sprintf(tamEnBytesLog, "%d", inodo.tamEnBytesLog);
-        strcat (buffer, inodo.tamEnBytesLog);
+        strcat (buffer,tamEnBytesLog);
         strcat(buffer,"\t");
 
 
         //nombre
         strcat (buffer, RED);
-        char *nombre;
+        char nombre[TAMNOMBRE];
       //  strcat(buffer, buffer_entradas[i].nombre);
-        sprintf(nombre, "s",buffer_entradas[i].nombre );
+        sprintf(nombre, "%s",Entradas[i % (BLOCKSIZE / sizeof(struct entrada))].nombre );
         strcat(buffer, nombre);
         strcat(buffer, RESET);
         strcat(buffer, "\n");
+        if(offset % (BLOCKSIZE/sizeof(struct entrada)) == 0){ 
+                offset += mi_read_f(p_inodo, Entradas, offset, BLOCKSIZE);
+        }
 
 
 }
 return Nentradas;
-
-
 
 }
 /**
@@ -413,55 +417,27 @@ int mi_creat(const char *camino, unsigned char permisos) {
 }
 
 /**
+ * @brief Busca la entrada camino para obtener el p_inodo
  * @param camino directorio
  * @param p_stat estructura estado 
- * @return 
+ * @return  p_inodo buscado o FALLO. 
 */
-
 
 int mi_stat(const char *camino, struct STAT *p_stat) {
     unsigned int p_inodo_dir=0, p_inodo=0, p_entrada=0;
-    int error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 1, 4);
+    int error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 0, p_stat->permisos);
     if (error < 0) {
         return error;
     }
 
+//si la entrada existe
 
-//si la entrada ya existe
-
-        if (error == ERROR_ENTRADA_YA_EXISTENTE){
-        if (mi_stat_f(p_inodo, p_stat) < 0){
+        if (mi_stat_f(p_inodo, p_stat) ==FALLO){
         return FALLO;
          } 
-        }
 
-        struct inodo inodo; 
-        if (leer_inodo(p_inodo, &inodo)==FALLO){
-            fprintf(stderr, RED "mi_stat:Error al leer el inodo\n "RESET);
-            return FALLO;
-        }
 
-    printf("Nº de inodo: %i\n", p_inodo); 
-    printf("tipo: %c\n",inodo.tipo);
-    printf("permisos: %i\n", inodo.permisos);
-
-    struct tm *ts;
-    char atime[80];
-    char mtime[80];
-    char ctime[80];
-
-    ts = localtime(&inodo.atime);
-    strftime(atime, sizeof(atime), "%a %Y-%m-%d %H:%M:%S", ts);
-     ts = localtime(&inodo.mtime);
-    strftime(mtime, sizeof(mtime), "%a %Y-%m-%d %H:%M:%S", ts);
-    ts = localtime(&inodo.ctime);
-    strftime(ctime, sizeof(ctime), "%a %Y-%m-%d %H:%M:%S", ts);
-
-    // Imprime los tiempos del inodo en la salida estándar.
-    printf("atime: %s \nmtime: %s \nctime: %s\n", atime, mtime, ctime);
-
-    printf("nlinks: %i\n", inodo.nlinks);
-    printf("tamEnBytesLog: %i\n", inodo.tamEnBytesLog);
-    printf("\nnumBloquesOcupados: %i\n", inodo.numBloquesOcupados);
-
+        return p_inodo;
 }
+
+

@@ -7,30 +7,27 @@ int main(int argc, char const *argv[]) {
         return FALLO;
     }
 
-    // Obtener argumentos
-    char *camino = (char*)argv[2];
-    char *nombreDisco = (char*)argv[1];
     struct STAT p_stat;
     
-    if (bmount(nombreDisco) == FALLO) {
-        mostrar_error_buscar_entrada(FALLO);
+    if (bmount(argv[1]) == FALLO) {
+        fprintf(stderr, RED "mi_stat.c: Error al montar el dispositivo\n"RESET);
         return FALLO;
     }
-    int p_inodo = mi_stat(camino, &p_stat);
+    int p_inodo = mi_stat(argv[2], &p_stat);
     if(p_inodo < 0) {
         mostrar_error_buscar_entrada(p_inodo);
         return FALLO;
     }
     
-    struct tm *aux;
-    char atime[100], mtime[100], ctime[100];
+    struct tm *ts;
+    char atime[80], mtime[80], ctime[80];
 
-    aux = localtime(&p_stat.atime);
-    strftime(atime, sizeof(atime), "%a %Y-%m-%d %H:%M:%S", aux);
-    aux = localtime(&p_stat.mtime);
-    strftime(mtime, sizeof(mtime), "%a %Y-%m-%d %H:%M:%S", aux);
-    aux = localtime(&p_stat.ctime);
-    strftime(ctime, sizeof(ctime), "%a %Y-%m-%d %H:%M:%S", aux);
+    ts = localtime(&p_stat.atime);
+    strftime(atime, sizeof(atime), "%a %Y-%m-%d %H:%M:%S", ts);
+    ts = localtime(&p_stat.mtime);
+    strftime(mtime, sizeof(mtime), "%a %Y-%m-%d %H:%M:%S", ts);
+    ts = localtime(&p_stat.ctime);
+    strftime(ctime, sizeof(ctime), "%a %Y-%m-%d %H:%M:%S", ts);
 
     fprintf(stdout, "Nº de inodo: %d\n", p_inodo);
     fprintf(stdout, "tipo: %c\n", p_stat.tipo);

@@ -1,9 +1,6 @@
 #include "ficheros_basico.h"
 
 
-
-
-
 /**
  * Programa principal
  * Formatea el dispositivo virtual con el tamaño de nbloques. 

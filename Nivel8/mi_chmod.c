@@ -7,7 +7,7 @@
 
 int main (int argc, char ** argv){
     if (argc!=4){
-        fprinf(stderr, RED "Sintaxis: ./mi_chmod <disco> <permisos> </ruta>\n"RESET);
+        fprintf(stderr, RED "Sintaxis: ./mi_chmod <nombre_dispositivo> <permisos> </ruta>\n"RESET);
         return FALLO;
     }
 
@@ -22,20 +22,22 @@ int main (int argc, char ** argv){
         return FALLO;
     }
 
-    if (mi_chmod(argv[1], permisos)<0){
-        fprintf(stderr, RED "Error al cambiar los permisos del %s"RESET, argv[1]);
+ // Montar  del dispositivo virtual
+    if (bmount(argv[1]) == FALLO) {
+        fprintf(stderr, RED "mi_chmod.c: Error al montar el dispositivo\n" RESET);
+        return FALLO;
+    }
+    int error = mi_chmod(argv[3], permisos);
+    if (error<0){
+        mostrar_error_buscar_entrada(error);
         return FALLO;
     }
 
 
-
-
-
-
-
-
-
-
+if (bumount() == FALLO){
+        fprintf(stderr, RED "mi_chmod.c: Error al desmontar el dispositivo\n" RESET);
+        return FALLO;
+    }
 
 
 
