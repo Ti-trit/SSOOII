@@ -9,6 +9,7 @@ struct entrada {
 
 #define DEBUGN7 1
 
+
 //errores
 #define ERROR_CAMINO_INCORRECTO (-2)
 #define ERROR_PERMISO_LECTURA (-3)

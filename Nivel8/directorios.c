@@ -277,7 +277,6 @@ int buscar_entrada(const char *camino_parcial, unsigned int *p_inodo_dir, unsign
     return EXITO;
 }
 
-
 /**
  * @brief Pone el contenido del directorio en un buffer de memoria
  * @param  camino directorio
@@ -311,9 +310,9 @@ if (inodo.tipo != tipo){
 int Nentradas = inodo.tamEnBytesLog/sizeof(struct entrada);
 //struct entrada buffer_entradas[Nentradas];
 struct entrada Entradas[BLOCKSIZE/sizeof(struct entrada)];
-int offset= 0;
+memset(Entradas, 0, sizeof(struct entrada));
+int offset = mi_read_f(p_inodo, Entradas,0,BLOCKSIZE);
 
- offset = mi_read_f(p_inodo, Entradas,0,BLOCKSIZE);
 if (offset==FALLO){
     fprintf(stderr, RED "mi_dir: Error en mi read()\n"RESET);return FALLO;
 }
@@ -354,7 +353,7 @@ for (int i =0; i<Nentradas; i++){
 
         //tamaño
         strcat(buffer, YELLOW);
-        char tamEnBytesLog[16];
+        char tamEnBytesLog[10];
         sprintf(tamEnBytesLog, "%d", inodo.tamEnBytesLog);
         strcat (buffer,tamEnBytesLog);
         strcat(buffer,"\t");
