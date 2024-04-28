@@ -7,7 +7,8 @@ struct entrada {
     unsigned int ninodo;
 };
 
-#define DEBUGN7 1
+#define DEBUGN7 0
+
 
 //errores
 #define ERROR_CAMINO_INCORRECTO (-2)
@@ -27,3 +28,5 @@ int mi_creat(const char *camino, unsigned char permisos);
 int mi_dir(const char *camino, char *buffer, char tipo);
 int mi_chmod(const char *camino, unsigned char permisos);
 int mi_stat(const char *camino, struct STAT *p_stat);
+int mi_write(const char *camino, const void *buf, unsigned int offset, unsigned int nbytes);
+int mi_read(const char *camino, void *buf, unsigned int offset, unsigned int nbytes);
