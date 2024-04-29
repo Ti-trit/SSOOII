@@ -465,3 +465,21 @@ int mi_stat(const char *camino, struct STAT *p_stat) {
 
         return p_inodo;
 }
+
+int mi_read(const char *camino, void *buf, unsigned int offset, unsigned int nbytes) {
+    unsigned int p_inodo_dir=0, p_inodo=0, p_entrada=0;
+    int error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 1, 4);
+    if (error < 0) {
+        return error;
+    }
+
+    int bytes_leidos = mi_read_f(p_inodo, buf, offset, nbytes);
+    if (bytes_leidos < 0) {
+        fprintf(stderr, RED "mi_read: Error al leer los nbytes\n"RESET);
+        return FALLO;
+    }
+
+    return bytes_leidos;
+
+
+}
