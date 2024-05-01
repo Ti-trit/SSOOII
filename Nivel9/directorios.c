@@ -446,14 +446,167 @@ int mi_stat(const char *camino, struct STAT *p_stat) {
  * @return bytes escritos
 */
 
-int mi_write(const char *camino, const void *buf, unsigned int offset, unsigned int nbytes){    
+int mi_write(const char *camino, const void *buf, unsigned int offset, unsigned int nbytes){
 
-//primero buscaremos la entrada
+    // primero buscaremos la entrada
 
-int error = buscar_entrada();
+    unsigned int p_inodo_dir = 0, p_inodo = 0, p_entrada = 0;
 
+    struct UltimaEntrada UltimaEntradaEscritura;
+    int bytes_escritos = 0;
+    // Sin caché
+    if (USARCACHE == 0)
+    {
+        // byscamos primero el ninodo
+        int error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 1, 4);
+        if (error < 0)
+        {
+            return error;
+        }
+        //bytes_escritos = mi_write_f(p_inodo, buf, offset, nbytes);
+        //se asigna el p_inodo con buscar_entrada         
+    }
+    else if (USARCACHE == 1) { // Ultima Entrada del Lectura
+
+        if (strcmp(UltimaEntradaEscritura.camino, camino) == 0)
+        {
+            p_inodo = UltimaEntradaEscritura.p_inodo;
+        }
+        else
+        {
+            int error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 0, 4);
+            if (error < 0) {
+                return error;
+            }
+            //actualizamos la ultima entrada
+            strcmp(UltimaEntradaEscritura.camino, camino);
+            UltimaEntradaEscritura.p_inodo = p_inodo;
+           
+        }
+    }else{
+
+ // buscamos si la entrada existe
+        int found = 1; // false
+        int index = 0;
+        while (index < CACHE_SIZE && found == 1)
+        {
+            if (strcmp(UltimasEntradas[index].camino, camino) == 0)
+            {
+                found = 0; // true
+            }
+            index++;
+        }
+
+        // hay tres escenarios
+        // CASO 1 --> La entrada existe en la tabla
+  
+        if (found == 0) {
+            p_inodo = UltimasEntradas[index].p_inodo;
+           // bytes_escritos = mi_write_f(UltimasEntradas[index].p_inodo, buf, offset, nbytes);
+        }
+
+        //La entrada no existe y hay que buscar si tenemos hueco en la tabla 
+        else if (found == 1) {
+
+            // buscamos si hay hueco
+            int hueco = -1;
+            int index = 0;
+            while (index < CACHE_SIZE && UltimasEntradas[index].camino != NULL)
+            {
+                index++;
+            }
+            if (index < CACHE_SIZE)
+            {
+                hueco = index;
+            }
+            //buscaremos la entrada y actualizaremos el p_inodo
+            int error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 0, 4);
+            if (error < 0)
+            {
+                return error;
+            }
+
+
+     if (USARCACHE == 2) { // TABLA FIFO
+      
+            // CASO 2 --> La entrada no existe y la podemos añadir
+            if (hueco != -1)
+            {
+                strcpy(UltimasEntradas[hueco].camino, camino);
+                UltimasEntradas[hueco].p_inodo = p_inodo;
+                ultima_insercion = hueco;
+            }
+            else
+            {
+                // CASO 3 --> La entrada no existe y no queda espacio para añadirla--> criterio FIFO
+                 int pos = (ultima_insercion + 1) % CACHE_SIZE;
+                strcpy(UltimasEntradas[pos].camino, camino);
+                UltimasEntradas[pos].p_inodo = p_inodo;
+                ultima_insercion = pos;
+            }
+        }
+    
+     if (USARCACHE == 3) { // LRU
+      struct timeval momento_actual;
+    if(gettimeofday(&momento_actual, NULL) < 0){
+        return FALLO;
+    } 
+
+    long fechaAntigua = momento_actual.tv_sec;
+ // CASO 2 --> La entrada no existe y la podemos añadir
+            if (hueco != -1)
+            {
+                strcpy(UltimasEntradas[hueco].camino, camino);
+                UltimasEntradas[hueco].p_inodo = p_inodo;
+                UltimasEntradas[hueco].ultima_consulta= momento_actual;
+            } else{
+             // CASO 3 --> La entrada no existe y no queda espacio para añadirla--> criterio FIFO
+                int pos = -1;
+                //buscamos si hay alguna entrada con fecha más antigua
+                for (int i =0; i<CACHE_SIZE; i++){
+                if (UltimasEntradas[i].camino!=NULL && UltimasEntradas[i].ultima_consulta.tv_sec<fechaAntigua){
+                         fechaAntigua= UltimasEntradas[i].ultima_consulta.tv_sec;
+                         pos=i;   
+
+                }
+                }
+
+                strcpy(UltimasEntradas[pos].camino, camino);
+                UltimasEntradas[pos].p_inodo = p_inodo;
+                UltimasEntradas->ultima_consulta= momento_actual;
+            }
+
+        }
+
+        // si existe la leemos directamente
+
+    }
+}
+    return mi_write_f(p_inodo, buf, offset, nbytes);
 
 }
+
+
+
+int mi_read(const char *camino, void *buf, unsigned int offset, unsigned int nbytes)
+{
+    unsigned int p_inodo_dir = 0, p_inodo = 0, p_entrada = 0;
+    int error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 1, 4);
+    if (error < 0)
+    {
+        return error;
+    }
+
+    int bytes_leidos = mi_read_f(p_inodo, buf, offset, nbytes);
+    if (bytes_leidos < 0)
+    {
+        fprintf(stderr, RED "mi_read: Error al leer los nbytes\n" RESET);
+        return FALLO;
+    }
+
+    return bytes_leidos;
+}
+
 
 int mi_read(const char *camino, void *buf, unsigned int offset, unsigned int nbytes) {
     unsigned int p_inodo_dir=0, p_inodo=0, p_entrada=0;
