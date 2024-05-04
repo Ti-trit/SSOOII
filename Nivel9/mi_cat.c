@@ -35,7 +35,7 @@ int bytes_leidos =0;
      leidos_aux = mi_read(ruta, buffer, offset, tambuffer);
 while (leidos_aux>0){//mientras hay contenido en el fichero 
     bytes_leidos+=leidos_aux; 
-       //imprimier por pantalla el contenido del fichero
+       //imprimir por pantalla el contenido del fichero
         write(1, buffer, leidos_aux);
 
       //  printf("%s", buffer);
