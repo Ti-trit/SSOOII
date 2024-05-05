@@ -38,7 +38,7 @@ while (leidos_aux>0){//mientras hay contenido en el fichero
        //imprimir por pantalla el contenido del fichero
         write(1, buffer, leidos_aux);
 
-      //  printf("%s", buffer);
+       // printf("%s", buffer);
       //actualizamos el offset de lectura
 
     offset+=leidos_aux;
@@ -51,26 +51,26 @@ if (bytes_leidos<0){
         bytes_leidos = 0;
 }
 
-struct superbloque SB;
-if (bread(posSB, &SB)<0){
-    fprintf(stderr, RED "Error al leer el superbloque\n"RESET);
-    return FALLO;
-}
-//buscamos el inodo del fichero
-unsigned int p_inodo_dir=0, p_inodo=0, p_entrada=0;
-struct inodo inodo;
-int error = buscar_entrada(ruta, p_inodo_dir,p_inodo,p_entrada,0,2);
-if (error<0){
-    mostrar_error_buscar_entrada(error);
-    return FALLO;
-}
-if (leer_inodo(p_inodo,&inodo)==FALLO){
-    fprintf(stderr, RED "mi_cat.c: Error al leer el inodo del fichero\n"RESET);
-    return FALLO;
-}
-if (bytes_leidos!=inodo.tamEnBytesLog){
-    fprintf(stderr, RED "El tamaño de bytes leidos no coincide con el tamaño de bytes del fichero\n"RESET);
-}
+// struct superbloque SB;
+// if (bread(posSB, &SB)<0){
+//     fprintf(stderr, RED "Error al leer el superbloque\n"RESET);
+//     return FALLO;
+// }
+// //buscamos el inodo del fichero
+// unsigned int p_inodo_dir=0, p_inodo=0, p_entrada=0;
+// struct inodo inodo;
+// int error = buscar_entrada(ruta, p_inodo_dir,p_inodo,p_entrada,0,2);
+// if (error<0){
+//     mostrar_error_buscar_entrada(error);
+//     return FALLO;
+// }
+// if (leer_inodo(p_inodo,&inodo)==FALLO){
+//     fprintf(stderr, RED "mi_cat.c: Error al leer el inodo del fichero\n"RESET);
+//     return FALLO;
+// }
+// if (bytes_leidos!=inodo.tamEnBytesLog){
+//     fprintf(stderr, RED "El tamaño de bytes leidos no coincide con el tamaño de bytes del fichero\n"RESET);
+// }
 fprintf(stdout, "\nTotal_leidos : %i\n", bytes_leidos);
 
     //desmontar el disco

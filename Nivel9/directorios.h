@@ -1,4 +1,5 @@
 #include "ficheros.h"
+#include <sys/time.h>
 
 
 #define TAMNOMBRE 60 //tamaño del nombre de directorio o fichero, en Ext2 = 256
@@ -8,6 +9,35 @@ struct entrada {
 };
 
 #define DEBUGN7 0
+
+#define USARCACHE 3 //0:sin caché, 1: última L/E, 2:tabla FIFO, 3:tabla LRU
+
+#define PROFUNDIDAD 32 //profundidad máxima del árbol de directorios
+
+
+// struct UltimaEntrada{
+//    char camino [TAMNOMBRE*PROFUNDIDAD];
+//    int p_inodo;
+
+  // #if USARCACHE==3 // tabla LRU
+  //     struct timeval ultima_consulta;
+  // #endif
+  // #if USARCACHE==2
+  // int ultima_insercion;
+  // #endif
+
+// };
+//     static struct UltimaEntrada UltimasEntradas[CACHE_SIZE];
+//  int ultima_insercion;
+//        struct timeval ultima_consulta;
+
+//tabla caché directorios
+// #if (USARCACHE==2 || USARCACHE==3)
+//    #define CACHE_SIZE 3 // cantidad de entradas para la caché
+//    static struct UltimaEntrada UltimasEntradas[CACHE_SIZE];
+//      int ultima_insercion;
+
+// #endif
 
 
 //errores

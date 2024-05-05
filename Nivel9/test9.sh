@@ -12,13 +12,13 @@ echo -e "\x1B[38;2;17;245;120m$ ./mi_touch disco 6 /fichero\x1b[0m"
 ./mi_touch disco 6 /fichero
 echo
 echo -e "\x1B[38;2;17;245;120m$ ./mi_ls -l  disco /\x1b[0m"
-./mi_ls -l  disco /
+./mi_ls disco / 1
 echo
 echo -e "\x1B[38;2;17;245;120m$ ./mi_escribir  disco /fichero "hola que tal" 5120\x1b[0m"
 ./mi_escribir  disco /fichero "hola que tal" 5120
 echo
 echo -e "\x1B[38;2;17;245;120m$ ./mi_ls -l  disco /\x1b[0m"
-./mi_ls -l  disco /
+./mi_ls disco / 1
 echo
 echo -e "\x1B[38;2;17;245;120m$ ./leer_sf disco\x1b[0m"
 ./leer_sf disco
@@ -30,7 +30,7 @@ echo -e "\x1B[38;2;17;245;120m$ ./mi_escribir  disco /fichero "estoy estupendame
 ./mi_escribir  disco /fichero "estoy estupendamente" 256000
 echo
 echo -e "\x1B[38;2;17;245;120m$ ./mi_ls -l  disco /fichero #si no habéis implementado mi_ls  para ficheros eliminar esta línea\x1b[0m"
-./mi_ls -l  disco /fichero
+./mi_ls disco /fichero 1
 echo
 echo -e "\x1B[38;2;17;245;120m##############################################################\x1b[0m"
 echo -e "\x1B[38;2;17;245;120m$ ./mi_mkdir disco 6 /dir1/\x1b[0m"
@@ -96,7 +96,7 @@ echo -e "\x1B[38;2;17;245;120m$ ./mi_escribir disco /dir1/fic2 \"***************
 ./mi_escribir disco /dir1/fic2 "******************************" 10000
 echo
 echo -e "\x1B[38;2;17;245;120m$ ./mi_ls -l  disco /dir1/\x1b[0m"
-./mi_ls -l  disco /dir1/
+./mi_ls  disco /dir1/ 1
 echo
 echo -e "\x1B[38;2;17;245;120m$ ./mi_cat disco /dir1/fic2 #tambuffer=BLOCKSIZE * 4\x1b[0m"
 ./mi_cat disco /dir1/fic2 

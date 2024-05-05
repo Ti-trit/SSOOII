@@ -242,7 +242,7 @@ int buscar_entrada(const char *camino_parcial, unsigned int *p_inodo_dir, unsign
             {
                 int ninodo = bufferEntradas[num_entrada_inodo].ninodo;
                 if (ninodo != FALLO)
-                {   // Si se había reservado un inodo para la entrada
+                { // Si se había reservado un inodo para la entrada
                     // lo liberamos
                     if (liberar_inodo(ninodo) == FALLO)
                     {
@@ -281,134 +281,147 @@ int buscar_entrada(const char *camino_parcial, unsigned int *p_inodo_dir, unsign
  * @brief Pone el contenido del directorio en un buffer de memoria
  * @param  camino directorio
  * @param   buffer  para guardar el contenido del directorio
- * @param   tipo    tipo de directorio?    
- * @return  nº de entradas leidas       
- * 
-*/
-int mi_dir(const char *camino, char *buffer, char tipo){
+ * @param   tipo    tipo de directorio?
+ * @return  nº de entradas leidas
+ *
+ */
+int mi_dir(const char *camino, char *buffer, char tipo)
+{
 
-unsigned int p_inodo_dir=0, p_inodo=0, p_entrada=0;
-int err =buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada,0, 4 );
-if (err<0){
-    mostrar_error_buscar_entrada(err);
+    unsigned int p_inodo_dir = 0, p_inodo = 0, p_entrada = 0;
+    int err = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 0, 4);
+    if (err < 0)
+    {
+        mostrar_error_buscar_entrada(err);
         return FALLO;
-}
-
-struct inodo inodo;
-if (leer_inodo(p_inodo, &inodo)==FALLO){
-        fprintf(stderr, RED "mi_dir: Error al leer el inodo %d"RESET, p_inodo);
-        return FALLO;
-}
-if ((inodo.permisos & 4)!= 4){
-    fprintf(stderr, RED"No tiene permisos de lectura\n" RESET);
-    return FALLO;
-}
-
-if (inodo.tipo != tipo){
-    fprintf(stderr, RED "Error: la sintaxis no concuerda con el tipo\n" RESET); return FALLO;
-}
-int Nentradas = inodo.tamEnBytesLog/sizeof(struct entrada);
-//struct entrada buffer_entradas[Nentradas];
-struct entrada Entradas[BLOCKSIZE/sizeof(struct entrada)];
-memset(Entradas, 0, sizeof(struct entrada));
-int offset = mi_read_f(p_inodo, Entradas,0,BLOCKSIZE);
-
-if (offset==FALLO){
-    fprintf(stderr, RED "mi_dir: Error en mi read()\n"RESET);return FALLO;
-}
-
-for (int i =0; i<Nentradas; i++){
-    if (leer_inodo(Entradas[i%(BLOCKSIZE/sizeof(struct entrada))].ninodo, &inodo)==FALLO){
-        fprintf(stderr, RED "mi_dir: Error al leer el inodo "RESET);return FALLO;
-    }
-//obtener la info de cada inodo
-
-    
-    if(inodo.tipo == 'd'){
-        strcat(buffer, BLUE);
-        strcat(buffer, "d");
-    }else{
-        strcat(buffer, GREEN);
-        strcat(buffer, "f");
     }
 
-    //añadir separación
-    strcat(buffer, "\t");
+    struct inodo inodo;
+    if (leer_inodo(p_inodo, &inodo) == FALLO)
+    {
+        fprintf(stderr, RED "mi_dir: Error al leer el inodo %d" RESET, p_inodo);
+        return FALLO;
+    }
+    if ((inodo.permisos & 4) != 4)
+    {
+        fprintf(stderr, RED "No tiene permisos de lectura\n" RESET);
+        return FALLO;
+    }
 
-    //permisos
-    strcat(buffer, MAGENTA);
-    strcat(buffer, (inodo.permisos & 4) ? "r" : "-");
-    strcat(buffer, (inodo.permisos & 2) ? "w" : "-");
-    strcat(buffer, (inodo.permisos & 1) ? "x" : "-");
-    strcat(buffer, "\t");  //  separador
+    if (inodo.tipo != tipo)
+    {
+        fprintf(stderr, RED "Error: la sintaxis no concuerda con el tipo\n" RESET);
+        return FALLO;
+    }
+    int Nentradas = inodo.tamEnBytesLog / sizeof(struct entrada);
+    // struct entrada buffer_entradas[Nentradas];
+    struct entrada Entradas[BLOCKSIZE / sizeof(struct entrada)];
+    memset(Entradas, 0, sizeof(struct entrada));
+    int offset = mi_read_f(p_inodo, Entradas, 0, BLOCKSIZE);
 
+    if (offset == FALLO)
+    {
+        fprintf(stderr, RED "mi_dir: Error en mi read()\n" RESET);
+        return FALLO;
+    }
 
-    //info acerca del tiempo
-     struct tm *tm; //ver info: struct tm
-     char tmp[64];
-       tm = localtime(&inodo.mtime);
-       sprintf(tmp, "%d-%02d-%02d %02d:%02d:%02d", tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min,  tm->tm_sec);
-       strcat(buffer, tmp);
+    for (int i = 0; i < Nentradas; i++)
+    {
+        if (leer_inodo(Entradas[i % (BLOCKSIZE / sizeof(struct entrada))].ninodo, &inodo) == FALLO)
+        {
+            fprintf(stderr, RED "mi_dir: Error al leer el inodo " RESET);
+            return FALLO;
+        }
+        // obtener la info de cada inodo
+
+        if (inodo.tipo == 'd')
+        {
+            strcat(buffer, BLUE);
+            strcat(buffer, "d");
+        }
+        else
+        {
+            strcat(buffer, GREEN);
+            strcat(buffer, "f");
+        }
+
+        // añadir separación
         strcat(buffer, "\t");
 
-        //tamaño
+        // permisos
+        strcat(buffer, MAGENTA);
+        strcat(buffer, (inodo.permisos & 4) ? "r" : "-");
+        strcat(buffer, (inodo.permisos & 2) ? "w" : "-");
+        strcat(buffer, (inodo.permisos & 1) ? "x" : "-");
+        strcat(buffer, "\t"); //  separador
+
+        // info acerca del tiempo
+        struct tm *tm; // ver info: struct tm
+        char tmp[64];
+        tm = localtime(&inodo.mtime);
+        sprintf(tmp, "%d-%02d-%02d %02d:%02d:%02d", tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec);
+        strcat(buffer, tmp);
+        strcat(buffer, "\t");
+
+        // tamaño
         strcat(buffer, YELLOW);
         char tamEnBytesLog[10];
         sprintf(tamEnBytesLog, "%d", inodo.tamEnBytesLog);
-        strcat (buffer,tamEnBytesLog);
-        strcat(buffer,"\t");
+        strcat(buffer, tamEnBytesLog);
+        strcat(buffer, "\t");
 
-
-        //nombre
-        strcat (buffer, RED);
+        // nombre
+        strcat(buffer, RED);
         char nombre[TAMNOMBRE];
-      //  strcat(buffer, buffer_entradas[i].nombre);
-        sprintf(nombre, "%s",Entradas[i % (BLOCKSIZE / sizeof(struct entrada))].nombre );
+        //  strcat(buffer, buffer_entradas[i].nombre);
+        sprintf(nombre, "%s", Entradas[i % (BLOCKSIZE / sizeof(struct entrada))].nombre);
         strcat(buffer, nombre);
         strcat(buffer, RESET);
         strcat(buffer, "\n");
-        if(offset % (BLOCKSIZE/sizeof(struct entrada)) == 0){ 
-                offset += mi_read_f(p_inodo, Entradas, offset, BLOCKSIZE);
+        if (offset % (BLOCKSIZE / sizeof(struct entrada)) == 0)
+        {
+            offset += mi_read_f(p_inodo, Entradas, offset, BLOCKSIZE);
         }
-
-
-}
-return Nentradas;
-
+    }
+    return Nentradas;
 }
 /**
  * @brief busca una entrada para obtener el nº del inodo
  * @param   camino  directorio
- * @param   permisos  permisos del directorio  
+ * @param   permisos  permisos del directorio
  * @return  EXITO/FALLO
- * 
-*/
-int mi_chmod(const char *camino, unsigned char permisos){
-    unsigned int p_inodo_dir=0, p_inodo=0, p_entrada = 0;
-    int err = buscar_entrada(camino, &p_inodo_dir, &p_inodo,&p_entrada, 0, permisos);
-    if (err<0){
+ *
+ */
+int mi_chmod(const char *camino, unsigned char permisos)
+{
+    unsigned int p_inodo_dir = 0, p_inodo = 0, p_entrada = 0;
+    int err = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 0, permisos);
+    if (err < 0)
+    {
         return err;
     }
 
-    //si la entrada existe llamamos a la siguietne funcion
-    if (mi_chmod_f(p_inodo, permisos)==FALLO){
-        fprintf(stderr, RED "mi_chmod: Error en mi_chmod_f\n"RESET);
+    // si la entrada existe llamamos a la siguietne funcion
+    if (mi_chmod_f(p_inodo, permisos) == FALLO)
+    {
+        fprintf(stderr, RED "mi_chmod: Error en mi_chmod_f\n" RESET);
         return FALLO;
     }
     return EXITO;
-
 }
 
 /**
  * @param   camino  directorio
  * @param   permisos  permisos del directorio
  * @return  EXITO/FALLO
-*/
+ */
 
-int mi_creat(const char *camino, unsigned char permisos) {
-    unsigned int p_inodo_dir=0, p_inodo=0, p_entrada=0;
+int mi_creat(const char *camino, unsigned char permisos)
+{
+    unsigned int p_inodo_dir = 0, p_inodo = 0, p_entrada = 0;
     int error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 1, permisos);
-    if (error < 0) {
+    if (error < 0)
+    {
         return error;
     }
 
@@ -418,33 +431,35 @@ int mi_creat(const char *camino, unsigned char permisos) {
 /**
  * @brief Busca la entrada camino para obtener el p_inodo
  * @param camino directorio
- * @param p_stat estructura estado 
- * @return  p_inodo buscado o FALLO. 
-*/
+ * @param p_stat estructura estado
+ * @return  p_inodo buscado o FALLO.
+ */
 
-int mi_stat(const char *camino, struct STAT *p_stat) {
-    unsigned int p_inodo_dir=0, p_inodo=0, p_entrada=0;
+int mi_stat(const char *camino, struct STAT *p_stat)
+{
+    unsigned int p_inodo_dir = 0, p_inodo = 0, p_entrada = 0;
     int error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 0, p_stat->permisos);
-    if (error < 0) {
+    if (error < 0)
+    {
         return error;
     }
 
-//si la entrada existe
+    // si la entrada existe
 
-        if (mi_stat_f(p_inodo, p_stat) ==FALLO){
+    if (mi_stat_f(p_inodo, p_stat) == FALLO)
+    {
         return FALLO;
-         } 
+    }
 
-
-        return p_inodo;
+    return p_inodo;
 }
 
 /**
- * 
+ *
  * @brief Escribe el contenido de un buffer en un fichero especificado por
  * su ruta.
  * @return bytes escritos
-*/
+ */
 
 int mi_write(const char *camino, const void *buf, unsigned int offset, unsigned int nbytes){
 
@@ -452,159 +467,161 @@ int mi_write(const char *camino, const void *buf, unsigned int offset, unsigned 
 
     unsigned int p_inodo_dir = 0, p_inodo = 0, p_entrada = 0;
 
-    struct UltimaEntrada UltimaEntradaEscritura;
-    int bytes_escritos = 0;
+  //  struct UltimaEntrada UltimaEntradaEscritura;
+    //int bytes_escritos = 0;
     // Sin caché
-    if (USARCACHE == 0)
-    {
+    // if (USARCACHE == 0)
+    // {
         // byscamos primero el ninodo
-        int error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 1, 4);
+        int error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 0, 4);
         if (error < 0)
         {
             return error;
         }
         //bytes_escritos = mi_write_f(p_inodo, buf, offset, nbytes);
         //se asigna el p_inodo con buscar_entrada         
-    }
-    else if (USARCACHE == 1) { // Ultima Entrada del Lectura
+//     }
+//     else if (USARCACHE == 1) { // Ultima Entrada del Lectura
 
-        if (strcmp(UltimaEntradaEscritura.camino, camino) == 0)
-        {
-            p_inodo = UltimaEntradaEscritura.p_inodo;
-        }
-        else
-        {
-            int error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 0, 4);
-            if (error < 0) {
-                return error;
-            }
-            //actualizamos la ultima entrada
-            strcmp(UltimaEntradaEscritura.camino, camino);
-            UltimaEntradaEscritura.p_inodo = p_inodo;
+//         if (strcmp(UltimaEntradaEscritura.camino, camino) == 0)
+//         {
+//             p_inodo = UltimaEntradaEscritura.p_inodo;
+//         }
+//         else
+//         {
+//             int error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 0, 4);
+//             if (error < 0) {
+//                 return error;
+//             }
+//             //actualizamos la ultima entrada
+//             strcmp(UltimaEntradaEscritura.camino, camino);
+//             UltimaEntradaEscritura.p_inodo = p_inodo;
            
-        }
-    }else{
+//         }
+//     }else{
 
- // buscamos si la entrada existe
-        int found = 1; // false
-        int index = 0;
-        while (index < CACHE_SIZE && found == 1)
-        {
-            if (strcmp(UltimasEntradas[index].camino, camino) == 0)
-            {
-                found = 0; // true
-            }
-            index++;
-        }
+//  // buscamos si la entrada existe
+//         int found = 1; // false
+//         int index = 0;
+//         while (index < CACHE_SIZE && found == 1)
+//         {
+//             if (strcmp(UltimasEntradas[index].camino, camino) == 0)
+//             {
+//                 found = 0; // true
+//             }
+//             index++;
+//         }
 
-        // hay tres escenarios
-        // CASO 1 --> La entrada existe en la tabla
+//         // hay tres escenarios
+//         // CASO 1 --> La entrada existe en la tabla
   
-        if (found == 0) {
-            p_inodo = UltimasEntradas[index].p_inodo;
-           // bytes_escritos = mi_write_f(UltimasEntradas[index].p_inodo, buf, offset, nbytes);
-        }
+//         if (found == 0) {
+//             p_inodo = UltimasEntradas[index].p_inodo;
+//            // bytes_escritos = mi_write_f(UltimasEntradas[index].p_inodo, buf, offset, nbytes);
+//         }
 
-        //La entrada no existe y hay que buscar si tenemos hueco en la tabla 
-        else if (found == 1) {
+//         //La entrada no existe y hay que buscar si tenemos hueco en la tabla 
+//         else if (found == 1) {
 
-            // buscamos si hay hueco
-            int hueco = -1;
-            int index = 0;
-            while (index < CACHE_SIZE && UltimasEntradas[index].camino != NULL)
-            {
-                index++;
-            }
-            if (index < CACHE_SIZE)
-            {
-                hueco = index;
-            }
-            //buscaremos la entrada y actualizaremos el p_inodo
-            int error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 0, 4);
-            if (error < 0)
-            {
-                return error;
-            }
+//             // buscamos si hay hueco
+//             int hueco = -1;
+//             int index = 0;
+//             while (index < CACHE_SIZE && UltimasEntradas[index].camino != NULL)
+//             {
+//                 index++;
+//             }
+//             if (index < CACHE_SIZE)
+//             {
+//                 hueco = index;
+//             }
+//             //buscaremos la entrada y actualizaremos el p_inodo
+//             int error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 0, 4);
+//             if (error < 0)
+//             {
+//                 return error;
+//             }
 
 
-     if (USARCACHE == 2) { // TABLA FIFO
+//      if (USARCACHE == 2) { // TABLA FIFO
       
-            // CASO 2 --> La entrada no existe y la podemos añadir
-            if (hueco != -1)
-            {
-                strcpy(UltimasEntradas[hueco].camino, camino);
-                UltimasEntradas[hueco].p_inodo = p_inodo;
-                ultima_insercion = hueco;
-            }
-            else
-            {
-                // CASO 3 --> La entrada no existe y no queda espacio para añadirla--> criterio FIFO
-                 int pos = (ultima_insercion + 1) % CACHE_SIZE;
-                strcpy(UltimasEntradas[pos].camino, camino);
-                UltimasEntradas[pos].p_inodo = p_inodo;
-                ultima_insercion = pos;
-            }
-        }
+//             // CASO 2 --> La entrada no existe y la podemos añadir
+//             if (hueco != -1)
+//             {
+//                 strcpy(UltimasEntradas[hueco].camino, camino);
+//                 UltimasEntradas[hueco].p_inodo = p_inodo;
+//                 ultima_insercion = hueco;
+//             }
+//             else
+//             {
+//                 // CASO 3 --> La entrada no existe y no queda espacio para añadirla--> criterio FIFO
+//                  int pos = (ultima_insercion + 1) % CACHE_SIZE;
+//                 strcpy(UltimasEntradas[pos].camino, camino);
+//                 UltimasEntradas[pos].p_inodo = p_inodo;
+//                 ultima_insercion = pos;
+//             }
+//         }
     
-     if (USARCACHE == 3) { // LRU
-      struct timeval momento_actual;
-    if(gettimeofday(&momento_actual, NULL) < 0){
-        return FALLO;
-    } 
+//      if (USARCACHE == 3) { // LRU
+//       struct timeval momento_actual;
+//     if(gettimeofday(&momento_actual, NULL) < 0){
+//         return FALLO;
+//     } 
 
-    long fechaAntigua = momento_actual.tv_sec;
- // CASO 2 --> La entrada no existe y la podemos añadir
-            if (hueco != -1)
-            {
-                strcpy(UltimasEntradas[hueco].camino, camino);
-                UltimasEntradas[hueco].p_inodo = p_inodo;
-                UltimasEntradas[hueco].ultima_consulta= momento_actual;
-            } else{
-             // CASO 3 --> La entrada no existe y no queda espacio para añadirla--> criterio FIFO
-                int pos = -1;
-                //buscamos si hay alguna entrada con fecha más antigua
-                for (int i =0; i<CACHE_SIZE; i++){
-                if (UltimasEntradas[i].camino!=NULL && UltimasEntradas[i].ultima_consulta.tv_sec<fechaAntigua){
-                         fechaAntigua= UltimasEntradas[i].ultima_consulta.tv_sec;
-                         pos=i;   
+//     long fechaAntigua = momento_actual.tv_sec;
+//  // CASO 2 --> La entrada no existe y la podemos añadir
+//             if (hueco != -1)
+//             {
+//                 strcpy(UltimasEntradas[hueco].camino, camino);
+//                 UltimasEntradas[hueco].p_inodo = p_inodo;
+//                 UltimasEntradas[hueco].ultima_consulta= momento_actual;
+//             } else{
+//              // CASO 3 --> La entrada no existe y no queda espacio para añadirla--> criterio FIFO
+//                 int pos = -1;
+//                 //buscamos si hay alguna entrada con fecha más antigua
+//                 for (int i =0; i<CACHE_SIZE; i++){
+//                 if (UltimasEntradas[i].camino!=NULL && UltimasEntradas[i].ultima_consulta.tv_sec<fechaAntigua){
+//                          fechaAntigua= UltimasEntradas[i].ultima_consulta.tv_sec;
+//                          pos=i;   
 
-                }
-                }
+//                 }
+//                 }
 
-                strcpy(UltimasEntradas[pos].camino, camino);
-                UltimasEntradas[pos].p_inodo = p_inodo;
-                UltimasEntradas->ultima_consulta= momento_actual;
-            }
+//                 strcpy(UltimasEntradas[pos].camino, camino);
+//                 UltimasEntradas[pos].p_inodo = p_inodo;
+//                 UltimasEntradas->ultima_consulta= momento_actual;
+//             }
 
-        }
+//         }
 
-        // si existe la leemos directamente
+//         // si existe la leemos directamente
 
-    }
-}
+//     }
+// }
     return mi_write_f(p_inodo, buf, offset, nbytes);
 
 }
 
 
 
+
 int mi_read(const char *camino, void *buf, unsigned int offset, unsigned int nbytes)
 {
     unsigned int p_inodo_dir = 0, p_inodo = 0, p_entrada = 0;
-    int error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 1, 4);
+    int error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 0, 4);
     if (error < 0)
     {
         return error;
     }
 
-    int bytes_leidos = mi_read_f(p_inodo, buf, offset, nbytes);
+   /* int bytes_leidos = mi_read_f(p_inodo, buf, offset, nbytes);
     if (bytes_leidos < 0)
     {
         fprintf(stderr, RED "mi_read: Error al leer los nbytes\n" RESET);
         return FALLO;
     }
-
-    return bytes_leidos;
+    */
+   
+   // return bytes_leidos;
+   return mi_read_f(p_inodo,buf,offset,nbytes);
 }
-
 
