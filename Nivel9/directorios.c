@@ -612,16 +612,6 @@ int mi_read(const char *camino, void *buf, unsigned int offset, unsigned int nby
     {
         return error;
     }
-
-   /* int bytes_leidos = mi_read_f(p_inodo, buf, offset, nbytes);
-    if (bytes_leidos < 0)
-    {
-        fprintf(stderr, RED "mi_read: Error al leer los nbytes\n" RESET);
-        return FALLO;
-    }
-    */
-   
-   // return bytes_leidos;
    return mi_read_f(p_inodo,buf,offset,nbytes);
 }
 
