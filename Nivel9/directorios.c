@@ -467,36 +467,37 @@ int mi_write(const char *camino, const void *buf, unsigned int offset, unsigned 
 
     unsigned int p_inodo_dir = 0, p_inodo = 0, p_entrada = 0;
 
-  //  struct UltimaEntrada UltimaEntradaEscritura;
+    struct UltimaEntrada UltimaEntradaEscritura;
     //int bytes_escritos = 0;
     // Sin caché
     // if (USARCACHE == 0)
     // {
         // byscamos primero el ninodo
-        int error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 0, 4);
-        if (error < 0)
-        {
-            return error;
-        }
+        // int error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 0, 4);
+        // if (error < 0)
+        // {
+        //     return error;
+        // }
         //bytes_escritos = mi_write_f(p_inodo, buf, offset, nbytes);
         //se asigna el p_inodo con buscar_entrada         
 //     }
 //     else if (USARCACHE == 1) { // Ultima Entrada del Lectura
 
-//         if (strcmp(UltimaEntradaEscritura.camino, camino) == 0)
-//         {
-//             p_inodo = UltimaEntradaEscritura.p_inodo;
-//         }
-//         else
-//         {
-//             int error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 0, 4);
-//             if (error < 0) {
-//                 return error;
-//             }
-//             //actualizamos la ultima entrada
-//             strcmp(UltimaEntradaEscritura.camino, camino);
-//             UltimaEntradaEscritura.p_inodo = p_inodo;
-           
+        if (strcmp(UltimaEntradaEscritura.camino, camino) == 0)
+        {
+            p_inodo = UltimaEntradaEscritura.p_inodo;
+        }
+        else
+        {
+            int error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 0, 4);
+            if (error < 0) {
+                return error;
+            }
+            //actualizamos la ultima entrada
+            strcpy(UltimaEntradaEscritura.camino, camino);
+            UltimaEntradaEscritura.p_inodo = p_inodo;
+            fprintf(stderr, YELLOW "[mi_write() → Actualizamos la caché de escritura])\n"RESET);
+        }
 //         }
 //     }else{
 
@@ -604,14 +605,26 @@ int mi_write(const char *camino, const void *buf, unsigned int offset, unsigned 
 
 
 
-int mi_read(const char *camino, void *buf, unsigned int offset, unsigned int nbytes)
-{
+int mi_read(const char *camino, void *buf, unsigned int offset, unsigned int nbytes){
+
+struct UltimaEntrada UltimaEntradaLectura;
     unsigned int p_inodo_dir = 0, p_inodo = 0, p_entrada = 0;
-    int error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 0, 4);
-    if (error < 0)
-    {
-        return error;
-    }
+    if (strcmp(UltimaEntradaLectura.camino, camino) == 0)
+        {
+            p_inodo = UltimaEntradaLectura.p_inodo;
+        }
+        else
+        {
+            int error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 0, 4);
+            if (error < 0) {
+                return error;
+            }
+            //actualizamos la ultima entrada
+            strcpy(UltimaEntradaLectura.camino, camino);
+            UltimaEntradaLectura.p_inodo = p_inodo;
+            fprintf(stderr, YELLOW "Actualizamos la caché mi read()\n"RESET);
+        }
+  
    return mi_read_f(p_inodo,buf,offset,nbytes);
 }
 

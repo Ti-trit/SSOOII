@@ -29,7 +29,7 @@ int main(int argc, char const *argv[]){
     fprintf(stdout, "Longitud texto: %li\n", strlen(argv[3]));
     int bytes = mi_write(ruta, argv[3], offset, strlen(argv[3]));
     if (bytes < 0) {
-        fprintf(stderr, RED "mi_escribir.c: Error en mi_write()\n"RESET);
+        //fprintf(stderr, RED "mi_escribir.c: Error en mi_write()\n"RESET);
         bytes = 0;
     }
     fprintf(stdout, "Bytes escritos: %i\n", bytes);
