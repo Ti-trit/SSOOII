@@ -61,3 +61,4 @@ int mi_read(const char *camino, void *buf, unsigned int offset, unsigned int nby
 //NIVEL 10
 int mi_link(const char *camino1, const char *camino2);
 int mi_unlink(const char *camino);
+int mi_rm_r(const char *ruta );
