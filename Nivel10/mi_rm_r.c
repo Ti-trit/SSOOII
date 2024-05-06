@@ -13,6 +13,28 @@ if (argc!=3){
     return FALLO;
 }
 
-    mi_rm_r();
+   //montar el disco
+
+if (bmount(argv[1])==FALLO){
+          fprintf(stderr, RED "mi_rm_r.c: Error al montar el disco\n"RESET);
+            return FALLO;
+    }
+
+char * ruta = argv[2];
+if (ruta[strlen(ruta)-1]!='/'){//es un fichero
+        fprintf(stderr, RED "mi_rm_r: La ruta no es de un directorio %s\n"RESET, ruta);
+        return FALLO;
+    
+}
+    if (mi_rm_r(argv[2])==FALLO){
+        perror("Error");
+        return FALLO;
+    }
+
+      //desmontar el disco
+    if (bumount()==FALLO){
+        fprintf(stderr, RED RESET);
+        return FALLO;
+    }
 return EXITO;
 }
