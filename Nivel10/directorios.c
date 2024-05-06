@@ -714,7 +714,7 @@ int mi_unlink(const char *camino){
 
 /**
  * 
- * 
+ * Borra recusrivamente el contenido de un directorio no vacío.
 */
 
 int mi_rm_r(const char * ruta){
