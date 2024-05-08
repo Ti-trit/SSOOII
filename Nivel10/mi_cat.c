@@ -75,7 +75,7 @@ fprintf(stdout, "\nTotal_leidos : %i\n", bytes_leidos);
 
     //desmontar el disco
     if (bumount()==FALLO){
-        fprintf(stderr, RED RESET);
+        fprintf(stderr, RED "mi_cat.c: Error al desmontar el disco\n"RESET);
         return FALLO;
     }
 
