@@ -1,6 +1,6 @@
 #include "directorios.h"
 /**
- * Programa que borra un fichero o directorio, llamando a mi_unlink()
+ * Programa que borra un fichero , llamando a mi_unlink()
 */
 
 int main (int argc, char ** argv){
