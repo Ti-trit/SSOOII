@@ -1,6 +1,6 @@
 #include "directorios.h"
 /**
- * Programa que borra un directorio, llamando a mi_unlink()
+ * Programa que borra un directorio vacío, llamando a mi_unlink()
 */
 
 int main (int argc, char ** argv){
@@ -19,7 +19,7 @@ int main (int argc, char ** argv){
     char * ruta = argv[2];
 
     if (ruta[strlen(ruta)-1]!='/'){//es un fichero
-        fprintf(stderr, RED "mi_rm.c: Es un directorio\n" RESET);
+        fprintf(stderr, RED "mi_rm.c: Esta programa no borra ficheros\n" RESET);
         return FALLO;
     }
 
@@ -29,13 +29,13 @@ int main (int argc, char ** argv){
         return FALLO;
     }
     int nEntradas = inodo_dir.tamEnBytesLog/sizeof(struct entrada);
-    if (nEntradas==0){
-        fprintf(stderr, RED "mi_rm_r: l directorio es vacío\n"RESET);
+    if (nEntradas!=0){
+        fprintf(stderr, RED "mi_rm_r: l directorio no es vacío\n"RESET);
         return FALLO;
     }
 
     if (mi_unlink(ruta)==FALLO) {
-        fprintf(stderr, RED "mi_rm.c: Fallo al borrar el fichero\n"RESET);
+        fprintf(stderr, RED "mi_rm.c: Fallo al borrar el directorio %s\n"RESET, ruta);
         return FALLO;
     }
 
