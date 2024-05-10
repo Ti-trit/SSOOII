@@ -1,4 +1,7 @@
-
+#include "directorios.h"
+/**
+ * Programa que crea un enlace a un fichero , llamando a mi_link()
+*/
 
 int main(int argc, char *argv[]) {
     // Comprobar el número correcto de argumentos
