@@ -1,35 +1,40 @@
 #include "directorios.h"
+
 /**
- * Programa que crea un enlace a un fichero , llamando a mi_link()
+ * Programa que crea un enlace a un fichero, llamando a mi_link().
+ * 
 */
 
-int main(int argc, char *argv[]) {
-    // Comprobar el número correcto de argumentos
-        if (argc != 4) {
-            printf("Sintaxis: ./mi_link disco /ruta_fichero_original /ruta_enlace\n");
-            return FALLO;
-        }
-        // Obtenemos los argumentos
-    const char *disco = argv[1];
-    const char *ruta_fichero_original = argv[2];
-    const char *ruta_enlace = argv[3];
-
-    // Comprueba que las rutas sean válidas
-    struct stat file_stat;
-    if (stat(ruta_fichero_original, &file_stat) != 0 || !S_ISREG(file_stat.st_mode)) {
-        printf("Error: %s no es un archivo válido.\n", ruta_fichero_original);
+int main(int argc, char **argv){
+    if(argc != 4){
+        fprintf(stderr, RED "Sintaxis: ./mi_link disco /ruta_fichero_original /ruta_enlace\n" RESET);
         return FALLO;
     }
 
-    if (stat(ruta_enlace, &file_stat) == 0) {
-        printf("Error: El archivo %s ya existe.\n", ruta_enlace);
-        return FALLO;
-    }
+    char * ruta_fichero_original = argv[2];
+    char * ruta_enlace = argv[3];
 
-    // Crear el enlace
-    if (mi_link(ruta_fichero_original, ruta_enlace) != 0) {
-        perror("Error al crear el enlace");
+   // si las rutas son directorios error
+    if (ruta_fichero_original[strlen(ruta_fichero_original) - 1] == '/' || ruta_enlace[strlen(ruta_enlace) - 1] == '/') {
+        fprintf(stderr, RED "Las rutas deben corresponder a ficheros!\n" RESET);
         return FALLO;
     }
-    return EXITO; 
+    // Montar el disco
+    if (bmount(argv[1]) == FALLO) {
+          fprintf(stderr, RED "mi_link.c: Error al montar el disco\n"RESET);
+        return FALLO;
+    }
+    int error = mi_link(argv[2], argv[3]);
+    if (error < 0) {
+        mostrar_error_buscar_entrada(error);
+        return FALLO;
+    }
+    // desmontar el dispositivo
+    if (bumount() == FALLO){
+        fprintf(stderr, RED "mi_link.c: Error al desmontar el dispositivo virtual.\n" RESET);
+        return FALLO;
+    }
+    return EXITO;
 }
+
+
