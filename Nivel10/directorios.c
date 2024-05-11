@@ -89,6 +89,7 @@ void mostrar_error_buscar_entrada(int error)
  * @param   permisos
  * @return  EXITO O FALLO
  */
+
 int buscar_entrada(const char *camino_parcial, unsigned int *p_inodo_dir, unsigned int *p_inodo, unsigned int *p_entrada, char reservar, unsigned char permisos)
 {
     struct entrada entrada;
@@ -164,9 +165,9 @@ int buscar_entrada(const char *camino_parcial, unsigned int *p_inodo_dir, unsign
         }
     }
     // hasta Aqui
+if ((!(num_entrada_inodo < BLOCKSIZE/sizeof(struct entrada)) || (strcmp(inicial, bufferEntradas[num_entrada_inodo].nombre) != 0)) && (num_entrada_inodo == cant_entradas_inodo)) { // La entrada no existe
 
-    if ((strcmp(inicial, bufferEntradas[num_entrada_inodo].nombre) != 0) && num_entrada_inodo == cant_entradas_inodo)
-    {
+    // if ((strcmp(inicial, bufferEntradas[num_entrada_inodo].nombre) != 0) && num_entrada_inodo == cant_entradas_inodo){
         switch (reservar)
         {
         case 0:
@@ -276,6 +277,7 @@ int buscar_entrada(const char *camino_parcial, unsigned int *p_inodo_dir, unsign
     }
     return EXITO;
 }
+
 
 /**
  * @brief Pone el contenido del directorio en un buffer de memoria
@@ -858,7 +860,6 @@ if (nEntradas==0){
             return error;
         }
     
-
 
     }
 
