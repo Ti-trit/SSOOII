@@ -9,6 +9,7 @@ struct entrada {
 };
 
 #define DEBUGN7 0
+#define DEBUGN9 0
 
 #define USARCACHE 1 //0:sin caché, 1: última L/E, 2:tabla FIFO, 3:tabla LRU
 
@@ -61,4 +62,4 @@ int mi_read(const char *camino, void *buf, unsigned int offset, unsigned int nby
 //NIVEL 10
 int mi_link(const char *camino1, const char *camino2);
 int mi_unlink(const char *camino);
-int mi_rm_r(const char * ruta);
+int mi_rm_r(const char *ruta);

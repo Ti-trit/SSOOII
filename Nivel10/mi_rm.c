@@ -23,8 +23,8 @@ int main (int argc, char ** argv){
         return FALLO;
     }
 
-    if (mi_unlink(ruta)==FALLO) {
-        fprintf(stderr, RED "mi_rm.c: Fallo al borrar el fichero\n"RESET);
+    if (mi_unlink(ruta)<0) {
+        //fprintf(stderr, RED "mi_rm.c: Fallo al borrar el fichero\n"RESET);
         return FALLO;
     }
 

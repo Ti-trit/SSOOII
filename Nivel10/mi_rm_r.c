@@ -25,13 +25,13 @@ if (ruta[strlen(ruta)-1]!='/'){//es un fichero
     
 }
     if (mi_rm_r(argv[2])==FALLO){
-        perror("Error");
+       // perror("Error");
         return FALLO;
     }
 
       //desmontar el disco
     if (bumount()==FALLO){
-        fprintf(stderr, RED RESET);
+        fprintf(stderr, RED "mi_rm_r: Error al desmontar el"RESET);
         return FALLO;
     }
 return EXITO;
