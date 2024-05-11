@@ -637,66 +637,74 @@ struct UltimaEntrada UltimaEntradaLectura;
  * especificado por otra entrada de directorio camino1.
  * 
 */
-int mi_link(const char *camino1, const char *camino2) {
-    unsigned int p_inodo_dir1, p_inodo_dir2, p_inodo1, p_inodo2;
-    unsigned int p_entrada1, p_entrada2;
-    struct inodo p_inodo1_struct;
-    struct superbloque SB;
 
-    // Comprobamos si la entrada camino1 existe
-    if (buscar_entrada(camino1, &p_inodo_dir1, &p_inodo1, &p_entrada1, 0, 4) == FALLO) {
-        printf("Error: la entrada %s no existe.\n", camino1);
-        return FALLO;
-    }
 
-    // Creamos la entrada de directorio camino2
-    if (buscar_entrada(camino2, &p_inodo_dir2, &p_inodo2, &p_entrada2, 1, 6) == FALLO) {
-        printf("Error: la entrada %s ya existe.\n", camino2);
-        return FALLO;
-    }
+int mi_link(const char *camino1, const char *camino2){
 
-    // Leemos la entrada creada correspondiente a camino2
-    void *buf_entrada2 = malloc(sizeof(struct entrada));
-    if (buf_entrada2 == NULL) {
-        printf("Error: no se pudo asignar memoria para leer la entrada.\n");
-        return FALLO;
-    }
-    if (mi_read_f(p_inodo_dir2, buf_entrada2, p_entrada2 * sizeof(struct entrada), sizeof(struct entrada)) == FALLO) {
-        printf("Error: no se pudo leer la entrada en el inodo %d.\n", p_inodo_dir2);
-        free(buf_entrada2);
-        return FALLO;
-    }
+// Comprobamos que ambos caminos corresponden a ficheros
+if ((camino1[strlen(camino1)-1]=='/')||(camino2[strlen(camino2)-1]=='/') ){
 
-    // Asociamos a la entrada de camino2 el mismo inodo que el de camino1
-    struct entrada *entrada2 = (struct entrada *)buf_entrada2;
-    entrada2->inodo = p_inodo1;
-
-    // Escribimos la entrada modificada en el inodo de camino2
-    if (mi_write_f(p_inodo_dir2, entrada2, p_entrada2 * sizeof(struct entrada), sizeof(struct entrada)) == FALLO) {
-        printf("Error: no se pudo escribir la entrada en el inodo %d.\n", p_inodo_dir2);
-        free(buf_entrada2);
-        return FALLO;
-    }
-    free(buf_entrada2);
-
-    // Liberamos el inodo que se ha asociado a la entrada creada
-    if (liberar_inodo(p_inodo2) == FALLO) {
-        printf("Error al liberar el inodo %d.\n", p_inodo2);
-        return FALLO;
-    }
-
-    // Incrementamos la cantidad de enlaces (nlinks) de p_inodo1 y actualizar ctime
-    p_inodo1_struct.nlinks++;
-    p_inodo1_struct.ctime = time(NULL);
-
-    // Guardamos el inodo modificado de camino1
-    if (escribir_inodo(p_inodo1, &p_inodo1_struct) == FALLO) {
-        printf("Error: no se pudo escribir el inodo %d.\n", p_inodo1);
-        return FALLO;
-    }
-
-    return EXITO;
+    fprintf(stderr, RED "mi_link: Las rutas deben corresponder a ficheros\n"RESET);
+    return FALLO;
 }
+//comprobamos que la entrada camino1 exsita
+unsigned int p_inodo_dir1=0, p_inodo1=0, p_entrada1=0;
+int error = buscar_entrada(camino1, &p_inodo_dir1, &p_inodo1, &p_entrada1, 0, 4);
+if (error<0){
+    mostrar_error_buscar_entrada(error);
+    return FALLO;
+}
+
+struct inodo inodo1;
+if (leer_inodo(p_inodo1, &inodo1)==FALLO){
+    perror("Error");
+    return FALLO;
+}
+
+//tenemos permisos de lectura?
+if ((inodo1.permisos & 4)!= 4){
+    fprintf(stderr, RED "mi_link: No tenemos permisos de lectura\n "RESET);
+    return FALLO;
+}
+
+//comprobamos que la segunda entrada no exista
+unsigned int p_inodo_dir2=0, p_inodo2=0, p_entrada2=0;
+ error = buscar_entrada(camino2, &p_inodo_dir2, &p_inodo2, &p_entrada2, 1, 6);
+if (error<0){
+    mostrar_error_buscar_entrada(error);
+    return FALLO;
+}
+
+//leemos la entrada del camino 2
+struct entrada entrada2;
+
+if (mi_read_f(p_inodo_dir2,&entrada2, sizeof(struct entrada)*p_entrada2, sizeof(struct entrada))<0){
+    return FALLO;
+}
+
+//asociamos a la entrada2 el mismo inodo del inodo1
+entrada2.ninodo=p_inodo1;
+
+
+//Escribimos la entrada modificada en p_inod__dir2
+if (mi_write_f(p_inodo_dir2, &entrada2, p_entrada2*sizeof(struct entrada), sizeof(struct entrada))==FALLO){
+   fprintf(stderr, RED "Error al escribir la entrada\n"RESET);
+    return FALLO;
+}
+//liberamos el inodo asociado al p_inodo2
+if (liberar_inodo(p_inodo2)==FALLO){
+    perror("Error");
+    return FALLO;
+}
+inodo1.nlinks++;
+inodo1.ctime= time(NULL);
+if (escribir_inodo(p_inodo1,&inodo1)==FALLO){
+    fprintf(stderr, RED "mi_link: Error al salvar el inodo\n");
+    return FALLO;
+}
+return EXITO;
+}
+
 
 /**
  * @brief Función que borra la entrada de directorio especificada. Si es el último
