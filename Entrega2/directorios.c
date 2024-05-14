@@ -741,7 +741,7 @@ int mi_unlink(const char *camino){
 */
 
 
-int mi_link(const char *camino1, const char *camino2){
+/*int mi_link(const char *camino1, const char *camino2){
 
 // Comprobamos que ambos caminos corresponden a ficheros
 if ((camino1[strlen(camino1)-1]=='/')||(camino2[strlen(camino2)-1]=='/') ){
@@ -805,6 +805,57 @@ if (escribir_inodo(p_inodo1,&inodo1)==FALLO){
     return FALLO;
 }
 return EXITO;
+}
+*/
+
+int mi_link(const char *camino1, const char *camino2) {
+    unsigned int p_inodo_dir1 = 0, p_inodo1 = 0, p_entrada1 = 0, p_inodo_dir2 = 0, p_inodo2 = 0, p_entrada2 = 0;
+
+    if (!camino1 || !camino2) {
+        return FALLO;
+    }
+    
+    if (camino1[strlen(camino1) - 1] == '/' || camino2[strlen(camino2) - 1] == '/') { // Comprobar que las rutas no apunten a ficheros
+        return FALLO;
+    }
+
+    int error = buscar_entrada(camino1, &p_inodo_dir1, &p_inodo1, &p_entrada1, 0, 4);
+    if  (error < 0) { // Buscar entrada de camino1
+        return error;
+    }
+    error = buscar_entrada(camino2, &p_inodo_dir2, &p_inodo2, &p_entrada2, 1, 6);
+    if (error < 0) {  // Crear entrada para camino2
+        return error;
+    }
+   
+    struct inodo inodo1;
+    if (leer_inodo(p_inodo1, &inodo1) == FALLO) {
+        return FALLO;
+    }
+
+    struct entrada entrada; // Leemos la entrada creada correspondiente a camino2, o sea la entrada p_entrada2 de p_inodo_dir2.
+    if (mi_read_f(p_inodo_dir2, &entrada, p_entrada2 * sizeof(struct entrada), sizeof(struct entrada)) == FALLO) {
+        return FALLO;
+    }
+
+    entrada.ninodo = p_inodo1; // Creamos el enlace: Asociamos a esta entrada el mismo inodo que el asociado a la entrada de camino1, es decir p_inodo1.
+    
+    if (mi_write_f(p_inodo_dir2, &entrada, p_entrada2 * sizeof(struct entrada), sizeof(struct entrada)) == FALLO) { // Escribimos la entrada modificada en p_inodo_dir2.
+        return FALLO;
+    }
+
+    if (liberar_inodo(p_inodo2) == FALLO) { // Liberamos el inodo que se ha asociado a la entrada creada, p_inodo2. 
+        return FALLO;
+    }
+
+    inodo1.nlinks++;  // Incrementamos la cantidad de enlaces (nlinks) de p_inodo1, actualizamos el ctime y lo salvamos.
+    inodo1.ctime = time(NULL);
+
+    if (escribir_inodo(p_inodo1, &inodo1) == FALLO) { // guardar el inodo
+        return FALLO;
+    }
+
+    return EXITO;
 }
 
 /**
