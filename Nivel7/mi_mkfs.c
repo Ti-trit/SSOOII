@@ -1,7 +1,4 @@
-#include "ficheros_basico.h"
-
-
-
+#include "directorios.h"
 
 
 /**
@@ -24,15 +21,22 @@ char * camino = argv[1];
 //número de bloques
 int nbloques = atoi(argv[2]);
 
+ if(nbloques < 4){
+       fprintf(stderr, RED "Error: El número de bloques debe ser mayor o igual a 4\n" RESET);
+       return FALLO;
+    }
+
 //montar el dispositivo virtual
   if (bmount(camino)<0){
     fprintf(stderr, RED "Se ha producido un error al montar el dispositivo.\n"RESET);
     return FALLO;
   }
+ 
+
     //buffer 
-    unsigned char buf [nbloques];
+    unsigned char buf [BLOCKSIZE];
     //inicializar los elementos del buffer a 0s
-    memset(buf, 0, nbloques);
+    memset(buf, 0, BLOCKSIZE);
     //Escritura en el dispositivo
   for (int i = 0; i<nbloques; i++){
    if ( bwrite(i, buf)<0){
