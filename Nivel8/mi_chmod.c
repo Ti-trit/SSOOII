@@ -15,7 +15,7 @@ int main (int argc, char ** argv){
 
     //los permisos se indican en octal
 
-    int permisos = atoi(argv[2]);
+    unsigned char permisos = atoi(argv[2]);
     if (permisos<0 || permisos >7){
 
         fprintf(stderr, RED "Error: permisos no validos\n"RESET);

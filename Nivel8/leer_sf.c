@@ -1,6 +1,19 @@
 #include "directorios.h"
         
-void mostrar_buscar_entrada(char *camino, char reservar);
+void mostrar_buscar_entrada(char *camino, char reservar){
+  unsigned int p_inodo_dir=0,  p_inodo=0, p_entrada=0;
+  int error;
+    printf("\ncamino: %s, reservar: %d\n", camino, reservar);
+    error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, reservar, 6);
+    if (error<0){
+      mostrar_error_buscar_entrada(error);
+      //perror();
+
+    }
+
+  printf("**********************************************************************\n");
+}
+
 
 int main(int argc, char **argv){
 
@@ -257,6 +270,7 @@ int main(int argc, char **argv){
   }*/
 
      
+   #if DEBUGN7  
  
     mostrar_buscar_entrada("pruebas/", 1); //ERROR_CAMINO_INCORRECTO
     mostrar_buscar_entrada("/pruebas/", 0); //ERROR_NO_EXISTE_ENTRADA_CONSULTA
@@ -270,7 +284,7 @@ int main(int argc, char **argv){
     mostrar_buscar_entrada("/pruebas/docs/doc1", 1); //creamos /pruebas/docs/doc1
     mostrar_buscar_entrada("/pruebas/casos/", 1); //creamos /pruebas/casos/
     mostrar_buscar_entrada("/pruebas/docs/doc2", 1); //creamos /pruebas/docs/doc2
-
+#endif
       //Desmontar el dispositivo virtual
  if (bumount(argv[1])<0){
 
@@ -279,19 +293,5 @@ int main(int argc, char **argv){
   }
 
   return EXITO;
-}
-
-void mostrar_buscar_entrada(char *camino, char reservar){
-  unsigned int p_inodo_dir=0,  p_inodo=0, p_entrada=0;
-  int error;
-    printf("\ncamino: %s, reservar: %d\n", camino, reservar);
-    error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, reservar, 6);
-    if (error<0){
-      mostrar_error_buscar_entrada(error);
-      //perror();
-
-    }
-
-  printf("**********************************************************************\n");
 }
 

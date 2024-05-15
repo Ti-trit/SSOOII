@@ -52,6 +52,7 @@ if (tipo == 'f') {
     strncpy(nombreFichero, camino + index + 1, strlen(camino) - index);
     nombreFichero[strlen(camino) - index] = '\0'; 
     int numEntradas = mi_dir(nuevoCamino, buff, 'd');
+  
     char *linea = strtok(buff, "\n"); // Obtener la primera línea del buffer
     for (int i = 0; i < numEntradas; i++) {
         if (strstr(linea, nombreFichero) != NULL) {
@@ -69,7 +70,10 @@ if (tipo == 'f') {
     memset(buff, 0, TAMBUFFER);
    
     int numEntradas = mi_dir(argv[2], buff, tipo);
-  //  fprintf(stdout, BLUE "total entradas de %s es : %i\n"RESET, argv[2], numEntradas);
+     if (formato != 0 && tipo == 'd' && numEntradas!=-1) {
+        fprintf(stdout, "Total: %d\n",numEntradas);
+    }
+   // fprintf(stdout, BLUE "total entradas de %s es : %i\n"RESET, argv[2], numEntradas);
     if (numEntradas < 0) {
         mostrar_error_buscar_entrada(numEntradas);
         return FALLO;
@@ -86,9 +90,9 @@ if (tipo == 'f') {
     }
             fprintf(stdout, RESET "\n");
         } else {//formato expandido
-            if (tipo == 'd') {//solo imprimos el total en caso de directorios
-                fprintf(stdout, "Total: %d\n",numEntradas);
-            }
+            // if (tipo == 'd') {//solo imprimos el total en caso de directorios
+            //     fprintf(stdout, "Total: %d\n",numEntradas);
+            // }
             fprintf(stdout, "Tipo\tModo\tmTime\t\t\tTamaño\tNombre\n--------------------------------------------------------------------------------\n%s\n", buff);
         }
     }
