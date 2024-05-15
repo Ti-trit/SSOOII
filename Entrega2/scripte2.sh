@@ -4,7 +4,7 @@
 clear
 rm -rf disco* ext* res*
 make clean
-make
+make -j16
 echo -e "\x1B[38;2;17;245;120m######################################################################\x1b[0m"
 echo -e "\x1B[38;2;17;245;120m$ ./mi_mkfs disco 100000\x1b[0m"
 ./mi_mkfs disco 100000
