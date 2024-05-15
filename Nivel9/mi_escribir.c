@@ -14,14 +14,16 @@ int main(int argc, char const *argv[]){
     const char *ruta = (char*)argv[2];
     const unsigned int offset = atoi(argv[4]);
 
-    if (bmount(argv[1]) == FALLO) {
-        fprintf(stderr, RED "mi_escribir.c: Error al montar el dispositivo virtual\n" RESET);
-        return FALLO;
-    }
+   
 
-    // Si es un directorio error, no se puede escribir en uno
+    // Si es un directorio error, no se puede escribir en ello
     if ((ruta[strlen(ruta) - 1]) == '/') {
         fprintf(stderr, RED "mi_escribir.c: No se puede escribir en directorios.\n" RESET);
+        return FALLO;
+    }
+    
+     if (bmount(argv[1]) == FALLO) {
+        fprintf(stderr, RED "mi_escribir.c: Error al montar el dispositivo virtual\n" RESET);
         return FALLO;
     }
 

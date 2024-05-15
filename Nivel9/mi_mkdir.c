@@ -17,7 +17,8 @@ int main (int argc, char *argv[]){
         fprintf(stderr, RED"La ruta no termina en '/'\n"RESET);
         return FALLO;
     }
-    int permisos = atoi(argv[2]);
+    
+    unsigned char permisos = atoi(argv[2]);
     if (permisos < 0 || permisos > 7) {
         fprintf(stderr, RED "Error: modo inválido<<%i>>\n" RESET, permisos);
         return FALLO;
@@ -29,7 +30,7 @@ int main (int argc, char *argv[]){
         return FALLO;
     }
 
-    int error = mi_creat(argv[3], permisos); 
+    int error = mi_creat(camino, permisos); 
     if (error< 0) {
        mostrar_error_buscar_entrada(error);
         return FALLO;

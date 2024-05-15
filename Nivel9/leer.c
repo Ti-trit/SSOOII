@@ -1,4 +1,4 @@
-#include "ficheros.h"
+#include "directorios.h"
 
 #define tambuffer 1500 //Tamaño del buffer de lectura
 
