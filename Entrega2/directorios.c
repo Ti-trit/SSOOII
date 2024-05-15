@@ -863,62 +863,82 @@ int mi_link(const char *camino1, const char *camino2) {
  * Borra recusrivamente el contenido de un directorio no vacío.
 */
 
-// int mi_rm_r (const char *ruta) {
+int mi_rm_r (const char *ruta) {
 
-// unsigned int p_inodo_dir, p_inodo, p_entrada;
-// int error = buscar_entrada(ruta, &p_inodo_dir, &p_inodo, &p_entrada, 0, );
-// if (error<0){
-//     mostrar_error_buscar_entrada(error);
-//     return FALLO;
-// }
 
-// if (ruta[strlen(ruta)-1]!='/'){//es un fichero
-//     if (mi_unlink(ruta)<0){
-//         fprintf(stderr, RED "mi_rm_r: Error al borrar el fichero %s\n"RESET, ruta);
-//     }
-//     return EXITO;
-// }
-// //Caso de directorio
+if (ruta[strlen(ruta)-1] !='/'){//es un fichero, llamamos directamente a mi_unlink
+int error = mi_unlink(ruta);
+    if (error<0){
+       // fprintf(stderr, RED "mi_rm_r: Error al borrar el fichero %s\n"RESET, ruta);
+        return error;
+    }
+    return EXITO;
+}
 
-// struct inodo inodo_dir;
-// if (leer_inodo(p_inodo_dir, &inodo_dir)==FALLO){
-//     fprintf(stderr, RED"mi_rm_r: Error al leer el inodo del directorio\n"RESET);
-//     return FALLO;
-// }
-// int nEntradas = inodo_dir.tamEnBytesLog/sizeof(struct entrada);
-// if (nEntradas==0){
-//     fprintf(stderr, RED "mi_rm_r: l directorio es vacío\n"RESET);
-//     return FALLO;
-// }else{
-//     struct entrada Entradas[nEntradas];
-//     if (mi_read_f(p_inodo, &Entradas, 0, nEntradas*sizeof(struct entrada)==FALLO)){
-//         perror("Error");
-//         return FALLO;
-//     }
-//     for (int i = 0; i<nEntradas; i++){
-//         //modificar el nombre de la ruta para poder llamar a la funcion recursiva
-//         /*
-//         ejemplo : 
-//         ruta = /dir/dir1/-->/dir1/ 
-//         */
-//          char camino_inodo[strlen(ruta) + 1 + strlen(Entradas[i].nombre)];
-//         memset(camino_inodo, 0, strlen(ruta) + 1 + strlen(Entradas[i].nombre));
-//         strcpy(camino_inodo, ruta);
-//         strcat(camino_inodo, Entradas[i].nombre);
-//         struct inodo inodo;
-//         if (leer_inodo(Entradas[i].ninodo, &inodo) < 0) {
-//             return FALLO;
-//         }
-//         if (inodo.tipo == 'd') {
-//             strcat(camino_inodo, "/");
-//         }
-//         if ((error = mi_rm_r(camino_inodo)) < 0) {
-//             return error;
-//         }
+//Caso de directorio. Hay que leer sus entradas y borrarlas recursivamente
+unsigned int p_inodo_dir=0, p_inodo=0, p_entrada=0;
+int error = buscar_entrada(ruta, &p_inodo_dir, &p_inodo, &p_entrada, 0,4); //permisos temporales
+if (error<0){
+  //  mostrar_error_buscar_entrada(error);
+    return FALLO;
+}
+
+//Leemos el inodo del directorio para obtener el nº de entradas que tiene
+struct inodo inodo_dir;
+if (leer_inodo(p_inodo, &inodo_dir)==FALLO){
+    fprintf(stderr, RED"mi_rm_r: Error al leer el inodo del directorio\n"RESET);
+    return FALLO;
+}
+
+int nEntradas = inodo_dir.tamEnBytesLog / sizeof(struct entrada);
+
+
+
+
+        struct entrada Entradas[nEntradas]; //buffer de entradas
+    if (mi_read_f(p_inodo, &Entradas,0, nEntradas * sizeof(struct entrada))==FALLO){
+        perror("Error");
+        return FALLO;
+    }
+
+
+    for (int i = 0; i<nEntradas; i++){
+        //modificar el nombre de la ruta para poder llamar a la funcion recursiva
+        /*
+        ejemplo : 
+        ruta = /dir/dir1/-->  y la entrada es fic1 -->rutaInodo = /dir/dir1/fic1
+        */
     
 
-//     }
+    char *nuevoCamino = malloc(strlen(ruta)+strlen(Entradas[i].nombre)+2); // Asignar memoria para nuevoCamino
+    //poner a cero 
+    memset(nuevoCamino, 0, strlen(ruta)+strlen (Entradas[i].nombre)+2);
+    strcpy(nuevoCamino, ruta);
+    //concatenar el nombre de la nueva ruta a la ruta original
+    strcat(nuevoCamino, Entradas[i].nombre);
+    //Leemos el inodo de la entrada para determinar su tipo
+    struct inodo inodoEntrada;
+        if (leer_inodo(Entradas[i].ninodo, &inodoEntrada) < 0) {
+            return FALLO;
+        }
+    if (inodoEntrada.tipo == 'd') {
+            strcat(nuevoCamino, "/");
+        }
+        
 
-// }
-//     return EXITO;
-// }
+        
+        int error = mi_rm_r(nuevoCamino); //llamada recursivaa
+        if (error < 0) {
+            return error;
+        }
+    
+
+    }
+
+     error = mi_unlink(ruta);
+    if (error<0){
+        return error;
+    }
+
+    return EXITO;
+}
