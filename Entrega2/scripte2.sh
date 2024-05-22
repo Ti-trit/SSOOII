@@ -2,9 +2,8 @@
 # scripte2.sh
 
 clear
-rm -rf disco* ext* res*
 make clean
-make -j16
+make
 echo -e "\x1B[38;2;17;245;120m######################################################################\x1b[0m"
 echo -e "\x1B[38;2;17;245;120m$ ./mi_mkfs disco 100000\x1b[0m"
 ./mi_mkfs disco 100000
@@ -71,22 +70,22 @@ echo "               /     \\"
 echo "           fic111   fic112"
 echo -e "\x1b[0m"
 echo -e "\x1B[38;2;17;245;120m######################################################################\x1b[0m"
-echo -e "\x1B[38;2;17;245;120m$ ./mi_ls disco /\x1b[0m"
+echo -e "\x1B[38;2;17;245;120m$ ./mi_ls -l  disco /\x1b[0m"
 ./mi_ls disco / 1
 echo
 echo -e "\x1B[38;2;17;245;120m$ ./mi_stat disco /dir1/\x1b[0m"
 ./mi_stat disco /dir1/
 echo
-echo -e "\x1B[38;2;17;245;120m$ ./mi_ls disco /dir1/\x1b[0m"
+echo -e "\x1B[38;2;17;245;120m$ ./mi_ls -l disco /dir1/\x1b[0m"
 ./mi_ls disco /dir1/ 1 
 echo
 echo -e "\x1B[38;2;17;245;120m$ ./mi_stat disco /dir1/dir11/\x1b[0m"
 ./mi_stat disco /dir1/dir11/
 echo
-echo -e "\x1B[38;2;17;245;120m$ ./mi_ls disco /dir1/dir11/\x1b[0m"
+echo -e "\x1B[38;2;17;245;120m$ ./mi_ls -l disco /dir1/dir11/\x1b[0m"
 ./mi_ls disco /dir1/dir11/ 1
 echo
-echo -e "\x1B[38;2;17;245;120m$ ./mi_ls disco /dir1/dir12/ #Error: No existe el archivo o el directorio.\x1b[0m"
+echo -e "\x1B[38;2;17;245;120m$ ./mi_ls -l disco /dir1/dir12/ #Error: No existe el archivo o el directorio.\x1b[0m"
 ./mi_ls disco /dir1/dir12/ 1
 echo
 echo -e "\x1B[38;2;17;245;120m######################################################################\x1b[0m"
@@ -114,6 +113,9 @@ echo -e "\x1B[38;2;17;245;120m$ ./mi_escribir  disco /dir1/dir11/fic111 \"$(cat 
 echo -e "\x1B[38;2;17;245;120m#reservaremos 5 bloques de datos (3 escritos completos y 2 parciales)\x1b[0m"
 ./mi_escribir  disco /dir1/dir11/fic111 "$(cat texto2.txt)" 0
 echo
+echo -e "\x1B[38;2;17;245;120m$ ./mi_ls -l  disco /dir1/dir11/fic111 #eliminar comando si no se ha implementado mi_ls para ficheros\x1b[0m"
+./mi_ls disco /dir1/dir11/fic111 1 #eliminar comando si no se ha implementado mi_ls para ficheros
+echo
 echo -e "\x1B[38;2;17;245;120m$ ./leer_sf disco\x1b[0m"
 ./leer_sf disco
 echo
@@ -131,7 +133,7 @@ echo -e "\x1B[38;2;17;245;120m$ ./mi_escribir  disco /dir1/dir11/fic111 \"lo que
 ./mi_escribir  disco /dir1/dir11/fic111 "lo que sea" 209000
 echo
 echo -e "\x1B[38;2;17;245;120m######################################################################\x1b[0m"
-echo -e "\x1B[38;2;17;245;120m$ ./mi_ls disco /dir1/dir11/\x1b[0m"
+echo -e "\x1B[38;2;17;245;120m$ ./mi_ls -l disco /dir1/dir11/\x1b[0m"
 ./mi_ls disco /dir1/dir11/ 1
 echo
 echo -e "\x1B[38;2;17;245;120m######################################################################\x1b[0m"
@@ -195,7 +197,7 @@ echo "               /     \\"
 echo "           fic111   fic112"
 echo -e "\x1b[0m"
 echo -e "\x1B[38;2;17;245;120m######################################################################\x1b[0m"
-echo -e "\x1B[38;2;17;245;120m$ ./mi_ls disco /dir1/dir11/\x1b[0m"
+echo -e "\x1B[38;2;17;245;120m$ ./mi_ls -l disco /dir1/dir11/\x1b[0m"
 ./mi_ls disco /dir1/dir11/ 1
 echo
 echo -e "\x1B[38;2;17;245;120m$ ./mi_touch disco 6 /dir1/dir11/fic113\x1b[0m"
@@ -273,7 +275,7 @@ echo
 echo -e "\x1B[38;2;17;245;120m$ ./mi_rmdir disco /dir2/dir21/ #o mi_rm\x1b[0m"
 ./mi_rmdir disco /dir2/dir21/
 echo
-echo -e "\x1B[38;2;17;245;120m$ ./mi_ls disco /dir2/\x1b[0m"
+echo -e "\x1B[38;2;17;245;120m$ ./mi_ls -l disco /dir2/\x1b[0m"
 ./mi_ls disco /dir2/ 1
 echo
 echo -e "\x1B[38;2;17;245;120m######################################################################\x1b[0m"
@@ -290,7 +292,7 @@ echo -e "\x1b[0m"
 echo -e "\x1B[38;2;17;245;120m######################################################################\x1b[0m"
 echo -e "\x1B[38;2;17;245;120mCreamos más directorios de los que caben en 1 bloque\x1b[0m"
 echo -e "\x1B[38;2;17;245;120m######################################################################\x1b[0m"
-echo -e "\x1B[38;2;17;245;120m$ ./mi_mkdir disco /dir3/\x1b[0m"
+echo -e "\x1B[38;2;17;245;120m$ ./mi_mkdir disco 6 /dir3/\x1b[0m"
 ./mi_mkdir disco 6 /dir3/
 echo
 echo -e "\x1B[38;2;17;245;120mcreamos 17 subdirectorios sd0, sd1..., sd16 en /dir3/"
@@ -346,7 +348,7 @@ echo -e "\x1B[38;2;17;245;120m$ ./mi_stat disco /dir3/\x1b[0m"
 ./mi_stat disco /dir3/
 echo
 echo -e "\x1B[38;2;17;245;120mVolvemos a listar el directorio para ver que se ha eliminado un subdirectorio\x1b[0m"
-echo -e "\x1B[38;2;17;245;120m$ ./mi_ls disco /dir3/\x1b[0m"
+echo -e "\x1B[38;2;17;245;120m$ ./mi_ls -l disco /dir3/\x1b[0m"
 ./mi_ls disco /dir3/ 1
 
 echo "################################################################################"

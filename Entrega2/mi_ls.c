@@ -66,18 +66,21 @@ if (tipo == 'f') {
     free(nombreFichero);
 }else{
 
-
     memset(buff, 0, TAMBUFFER);
    
     int numEntradas = mi_dir(argv[2], buff, tipo);
-     if (formato != 0 && tipo == 'd' && numEntradas!=-1) {
-        fprintf(stdout, "Total: %d\n",numEntradas);
-    }
+    
    // fprintf(stdout, BLUE "total entradas de %s es : %i\n"RESET, argv[2], numEntradas);
     if (numEntradas < 0) {
         mostrar_error_buscar_entrada(numEntradas);
         return FALLO;
-    } else if (numEntradas > 0) {
+    }
+           fprintf(stdout, "Total: %d\n",numEntradas);
+
+    //  if (formato != 0 && tipo == 'd' ) {
+    //     fprintf(stdout, "Total: %d\n",numEntradas);
+    // }
+     if (numEntradas > 0) {
     if (formato == 0) {//formato simple
     char *linea = strtok(buff, "\n"); // Obtener la primera línea del buffer
     for (int i = 0; i < numEntradas && linea != NULL; i++) {
