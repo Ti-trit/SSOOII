@@ -40,4 +40,8 @@ int bumount();
 int bwrite(unsigned int nbloque, const void *buf);
 int bread(unsigned int nbloque, void *buf);
 
+//Funcions del nivel 11
+void mi_signalSem();
+void mi_waitSem();
+
 

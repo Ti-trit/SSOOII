@@ -426,7 +426,9 @@ int mi_creat(const char *camino, unsigned char permisos)
         return FALLO;
     }
     unsigned int p_inodo_dir = 0, p_inodo = 0, p_entrada = 0;
+    mi_waitSem();
     int error = buscar_entrada(camino, &p_inodo_dir, &p_inodo, &p_entrada, 1, permisos);
+    mi_signalSem();
     if (error < 0)
     {
         mostrar_error_buscar_entrada(error);
@@ -654,6 +656,7 @@ memset(&UltimaEntradaLectura, 0, sizeof(UltimaEntradaLectura));
 */
 int mi_unlink(const char *camino){
 
+        mi_waitSem();
     //comprobamos que la ruta existe
     unsigned int p_inodo_dir=0, p_inodo=0, p_entrada=0;
     //modo consulta y con permisos de lectura
@@ -667,6 +670,7 @@ int mi_unlink(const char *camino){
        
        if (leer_inodo(p_inodo, &inodo)<0){
         fprintf(stderr, RED "mi_unlink: Error al leer el inodo de %s\n"RESET, camino);
+        mi_signalSem();
         return FALLO;
        }
 
@@ -675,6 +679,7 @@ int mi_unlink(const char *camino){
         //y no está vacío
        if (inodo.tamEnBytesLog>0 && inodo.tipo=='d'){
         fprintf(stderr, RED "Error: El directorio %s no está vacío \n"RESET, camino);
+          mi_signalSem();
         return FALLO;
        }
     }
@@ -683,6 +688,7 @@ int mi_unlink(const char *camino){
         struct inodo inodo_dir;
         if (leer_inodo(p_inodo_dir, &inodo_dir)==FALLO){
        fprintf(stderr, RED "mi_unlink: Error al leer el inodo de entrada \n"RESET);
+         mi_signalSem();
        return FALLO;
         }
         unsigned int numEntradas = inodo_dir.tamEnBytesLog/sizeof(struct entrada);
@@ -695,15 +701,18 @@ int mi_unlink(const char *camino){
        //obtenemos directamente la ultima entrada del directorio
        if (mi_read_f(p_inodo_dir, &entrada,(numEntradas-1)*sizeof(struct entrada),sizeof(struct entrada))<0){
         perror("Error");
+          mi_signalSem();
         return FALLO;
        }
        if (mi_write_f(p_inodo_dir, &entrada, p_entrada*sizeof(struct entrada), sizeof(struct entrada))<FALLO){
         perror("Error");
+          mi_signalSem();
         return FALLO;
        }
         }
     //truncar el inodo
          if (mi_truncar_f(p_inodo_dir, (numEntradas-1) * sizeof(struct entrada)) == FALLO) {
+              mi_signalSem();
         return FALLO;
     }
 
@@ -717,18 +726,20 @@ int mi_unlink(const char *camino){
             //liberamos el inodo
             if (liberar_inodo(p_inodo)==FALLO){
                 fprintf(stderr, RED "mi_unlink: Error al liberar el inodo del directorio %s\n"RESET, camino);
+                  mi_signalSem();
                 return FALLO;
             }
         }else{
             //actualizamos el tiempo de actualizacion del inodo
             inodo.ctime= time(NULL);
             if (escribir_inodo(p_inodo, &inodo)==FALLO){
+                  mi_signalSem();
                 return FALLO;
             }
         }
 
         
-    
+      mi_signalSem();
     return EXITO;
 
 }
@@ -741,110 +752,54 @@ int mi_unlink(const char *camino){
 */
 
 
-/*int mi_link(const char *camino1, const char *camino2){
-
-// Comprobamos que ambos caminos corresponden a ficheros
-if ((camino1[strlen(camino1)-1]=='/')||(camino2[strlen(camino2)-1]=='/') ){
-
-    fprintf(stderr, RED "mi_link: Las rutas deben corresponder a ficheros\n"RESET);
-    return FALLO;
-}
-//comprobamos que la entrada camino1 exsita
-unsigned int p_inodo_dir1=0, p_inodo1=0, p_entrada1=0;
-int error = buscar_entrada(camino1, &p_inodo_dir1, &p_inodo1, &p_entrada1, 0, 4);
-if (error<0){
-    mostrar_error_buscar_entrada(error);
-    return FALLO;
-}
-
-struct inodo inodo1;
-if (leer_inodo(p_inodo1, &inodo1)==FALLO){
-    perror("Error");
-    return FALLO;
-}
-
-//tenemos permisos de lectura?
-if ((inodo1.permisos & 4)!= 4){
-    fprintf(stderr, RED "mi_link: No tenemos permisos de lectura\n "RESET);
-    return FALLO;
-}
-
-//comprobamos que la segunda entrada no exista
-unsigned int p_inodo_dir2=0, p_inodo2=0, p_entrada2=0;
- error = buscar_entrada(camino2, &p_inodo_dir2, &p_inodo2, &p_entrada2, 1, 6);
-if (error<0){
-    mostrar_error_buscar_entrada(error);
-    return FALLO;
-}
-
-//leemos la entrada del camino 2
-struct entrada entrada2;
-
-if (mi_read_f(p_inodo_dir2,&entrada2, sizeof(struct entrada)*p_entrada2, sizeof(struct entrada))<0){
-    return FALLO;
-}
-
-//asociamos a la entrada2 el mismo inodo del inodo1
-entrada2.ninodo=p_inodo1;
-
-
-//Escribimos la entrada modificada en p_inod__dir2
-if (mi_write_f(p_inodo_dir2, &entrada2, p_entrada2*sizeof(struct entrada), sizeof(struct entrada))==FALLO){
-   fprintf(stderr, RED "Error al escribir la entrada\n"RESET);
-    return FALLO;
-}
-//liberamos el inodo asociado al p_inodo2
-if (liberar_inodo(p_inodo2)==FALLO){
-    perror("Error");
-    return FALLO;
-}
-inodo1.nlinks++;
-inodo1.ctime= time(NULL);
-if (escribir_inodo(p_inodo1,&inodo1)==FALLO){
-    fprintf(stderr, RED "mi_link: Error al salvar el inodo\n");
-    return FALLO;
-}
-return EXITO;
-}
-*/
-
 int mi_link(const char *camino1, const char *camino2) {
+        mi_waitSem();
+
     unsigned int p_inodo_dir1 = 0, p_inodo1 = 0, p_entrada1 = 0, p_inodo_dir2 = 0, p_inodo2 = 0, p_entrada2 = 0;
 
     if (!camino1 || !camino2) {
+          mi_signalSem();
         return FALLO;
     }
     
     if (camino1[strlen(camino1) - 1] == '/' || camino2[strlen(camino2) - 1] == '/') { // Comprobar que las rutas no apunten a ficheros
+      mi_signalSem();
         return FALLO;
     }
-
     int error = buscar_entrada(camino1, &p_inodo_dir1, &p_inodo1, &p_entrada1, 0, 4);
+    mi_signalSem();
     if  (error < 0) { // Buscar entrada de camino1
+      mi_signalSem();
         return error;
     }
+
     error = buscar_entrada(camino2, &p_inodo_dir2, &p_inodo2, &p_entrada2, 1, 6);
     if (error < 0) {  // Crear entrada para camino2
+      mi_signalSem();
         return error;
     }
    
     struct inodo inodo1;
     if (leer_inodo(p_inodo1, &inodo1) == FALLO) {
+          mi_signalSem();
         return FALLO;
     }
 
     struct entrada entrada; // Leemos la entrada creada correspondiente a camino2, o sea la entrada p_entrada2 de p_inodo_dir2.
     if (mi_read_f(p_inodo_dir2, &entrada, p_entrada2 * sizeof(struct entrada), sizeof(struct entrada)) == FALLO) {
+          mi_signalSem();
         return FALLO;
     }
 
     entrada.ninodo = p_inodo1; // Creamos el enlace: Asociamos a esta entrada el mismo inodo que el asociado a la entrada de camino1, es decir p_inodo1.
     
     if (mi_write_f(p_inodo_dir2, &entrada, p_entrada2 * sizeof(struct entrada), sizeof(struct entrada)) == FALLO) { // Escribimos la entrada modificada en p_inodo_dir2.
+          mi_signalSem();
         return FALLO;
     }
 
     if (liberar_inodo(p_inodo2) == FALLO) { // Liberamos el inodo que se ha asociado a la entrada creada, p_inodo2. 
+          mi_signalSem();
         return FALLO;
     }
 
@@ -852,9 +807,10 @@ int mi_link(const char *camino1, const char *camino2) {
     inodo1.ctime = time(NULL);
 
     if (escribir_inodo(p_inodo1, &inodo1) == FALLO) { // guardar el inodo
+          mi_signalSem();
         return FALLO;
     }
-
+  mi_signalSem();
     return EXITO;
 }
 
@@ -862,63 +818,82 @@ int mi_link(const char *camino1, const char *camino2) {
  * 
  * Borra recusrivamente el contenido de un directorio no vacío.
 */
+int mi_rm_r (const char *ruta) {
 
-// int mi_rm_r (const char *ruta) {
 
-// unsigned int p_inodo_dir, p_inodo, p_entrada;
-// int error = buscar_entrada(ruta, &p_inodo_dir, &p_inodo, &p_entrada, 0, );
-// if (error<0){
-//     mostrar_error_buscar_entrada(error);
-//     return FALLO;
-// }
+if (ruta[strlen(ruta)-1] !='/'){//es un fichero, llamamos directamente a mi_unlink
+int error = mi_unlink(ruta);
+    if (error<0){
+       // fprintf(stderr, RED "mi_rm_r: Error al borrar el fichero %s\n"RESET, ruta);
+        return error;
+    }
+    return EXITO;
+}
 
-// if (ruta[strlen(ruta)-1]!='/'){//es un fichero
-//     if (mi_unlink(ruta)<0){
-//         fprintf(stderr, RED "mi_rm_r: Error al borrar el fichero %s\n"RESET, ruta);
-//     }
-//     return EXITO;
-// }
-// //Caso de directorio
+//Caso de directorio. Hay que leer sus entradas y borrarlas recursivamente
+unsigned int p_inodo_dir=0, p_inodo=0, p_entrada=0;
+int error = buscar_entrada(ruta, &p_inodo_dir, &p_inodo, &p_entrada, 0,4); //permisos temporales
+if (error<0){
+  //  mostrar_error_buscar_entrada(error);
+    return FALLO;
+}
 
-// struct inodo inodo_dir;
-// if (leer_inodo(p_inodo_dir, &inodo_dir)==FALLO){
-//     fprintf(stderr, RED"mi_rm_r: Error al leer el inodo del directorio\n"RESET);
-//     return FALLO;
-// }
-// int nEntradas = inodo_dir.tamEnBytesLog/sizeof(struct entrada);
-// if (nEntradas==0){
-//     fprintf(stderr, RED "mi_rm_r: l directorio es vacío\n"RESET);
-//     return FALLO;
-// }else{
-//     struct entrada Entradas[nEntradas];
-//     if (mi_read_f(p_inodo, &Entradas, 0, nEntradas*sizeof(struct entrada)==FALLO)){
-//         perror("Error");
-//         return FALLO;
-//     }
-//     for (int i = 0; i<nEntradas; i++){
-//         //modificar el nombre de la ruta para poder llamar a la funcion recursiva
-//         /*
-//         ejemplo : 
-//         ruta = /dir/dir1/-->/dir1/ 
-//         */
-//          char camino_inodo[strlen(ruta) + 1 + strlen(Entradas[i].nombre)];
-//         memset(camino_inodo, 0, strlen(ruta) + 1 + strlen(Entradas[i].nombre));
-//         strcpy(camino_inodo, ruta);
-//         strcat(camino_inodo, Entradas[i].nombre);
-//         struct inodo inodo;
-//         if (leer_inodo(Entradas[i].ninodo, &inodo) < 0) {
-//             return FALLO;
-//         }
-//         if (inodo.tipo == 'd') {
-//             strcat(camino_inodo, "/");
-//         }
-//         if ((error = mi_rm_r(camino_inodo)) < 0) {
-//             return error;
-//         }
+//Leemos el inodo del directorio para obtener el nº de entradas que tiene
+struct inodo inodo_dir;
+if (leer_inodo(p_inodo, &inodo_dir)==FALLO){
+    fprintf(stderr, RED"mi_rm_r: Error al leer el inodo del directorio\n"RESET);
+    return FALLO;
+}
+
+int nEntradas = inodo_dir.tamEnBytesLog / sizeof(struct entrada);
+
+
+
+
+        struct entrada Entradas[nEntradas]; //buffer de entradas
+    if (mi_read_f(p_inodo, &Entradas,0, nEntradas * sizeof(struct entrada))==FALLO){
+        perror("Error");
+        return FALLO;
+    }
+
+
+    for (int i = 0; i<nEntradas; i++){
+        //modificar el nombre de la ruta para poder llamar a la funcion recursiva
+        /*
+        ejemplo : 
+        ruta = /dir/dir1/-->  y la entrada es fic1 -->rutaInodo = /dir/dir1/fic1
+        */
     
 
-//     }
+    char *nuevoCamino = malloc(strlen(ruta)+strlen(Entradas[i].nombre)+2); // Asignar memoria para nuevoCamino
+    //poner a cero 
+    memset(nuevoCamino, 0, strlen(ruta)+strlen (Entradas[i].nombre)+2);
+    strcpy(nuevoCamino, ruta);
+    //concatenar el nombre de la nueva ruta a la ruta original
+    strcat(nuevoCamino, Entradas[i].nombre);
+    //Leemos el inodo de la entrada para determinar su tipo
+    struct inodo inodoEntrada;
+        if (leer_inodo(Entradas[i].ninodo, &inodoEntrada) < 0) {
+            return FALLO;
+        }
+    if (inodoEntrada.tipo == 'd') {
+            strcat(nuevoCamino, "/");
+        }
+        
 
-// }
-//     return EXITO;
-// }
+        
+        int error = mi_rm_r(nuevoCamino); //llamada recursivaa
+        if (error < 0) {
+            return error;
+        }
+    
+
+    }
+
+     error = mi_unlink(ruta);
+    if (error<0){
+        return error;
+    }
+
+    return EXITO;
+}

@@ -32,8 +32,9 @@
     char unsigned buf_bloque[BLOCKSIZE];
 
     int bytesEscritos = 0, auxBytesEscritos = 0;
-
+        mi_waitSem();
     unsigned int nbfisico = traducir_bloque_inodo(&inodo, primerBL, 1);
+      mi_signalSem();
     if (nbfisico == FALLO){
         fprintf(stderr, RED "mi_write_f: Error en traducir_bloque_inodo().\n" RESET);
         return FALLO;
@@ -71,7 +72,9 @@
     //2o PASO: Bloques intermedios (completos)
     if (primerBL < ultimoBL){
         for (int bloque = 1 + primerBL; bloque < ultimoBL; bloque++){
+            mi_waitSem();
             nbfisico = traducir_bloque_inodo(&inodo, bloque, 1);
+            mi_signalSem();
             if (nbfisico == FALLO){
                 fprintf(stderr, RED "mi_write_f: Error en traducir_bloque_inodo() \n" RESET);
                 return FALLO;
@@ -87,7 +90,9 @@
         }
 
         // 3r PASO: último bloque a escribir 
+        mi_waitSem();
         nbfisico = traducir_bloque_inodo(&inodo, ultimoBL, 1);
+        mi_signalSem();
         if (nbfisico == FALLO)
         {
              fprintf(stderr, RED "Error en traducir_bloque_inodo()"RESET);
@@ -112,6 +117,12 @@
 
      //actaulizamos los datos del inodo si hemos escrito más allá del final del fichero
 
+    //leemos de nuveo el inodo por si traducir_bloque_inodo hizo cambios
+    mi_waitSem();
+    if (leer_inodo(ninodo, &inodo) == FALLO) {
+        mi_signalSem();
+        return FALLO;
+    }
     if ((offset + nbytes) > inodo.tamEnBytesLog) { 
         inodo.tamEnBytesLog = nbytes + offset;
         inodo.ctime = time(NULL);
@@ -122,6 +133,7 @@
         fprintf(stderr, RED "Error escribiendo inodo %i" RESET, ninodo);
         return FALLO;
     }
+    mi_signalSem();
     return nbytes==bytesEscritos?  bytesEscritos: FALLO;
 }
 
@@ -224,6 +236,7 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
         bytesLeidos += (desp2 + 1);
     }
 
+    mi_waitSem();
     if (leer_inodo(ninodo, &inodo) == FALLO){
         fprintf(stderr, "Error en leer_inodo en mi_read_f().\n");
         return FALLO;
@@ -240,6 +253,7 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
         return FALLO;
     }
     
+    mi_signalSem();
     return nbytes==bytesLeidos?  bytesLeidos: FALLO;
 }
 
@@ -329,7 +343,8 @@ int mi_truncar_f(unsigned int ninodo, unsigned int nbytes){
         }else{
             primerBL=nbytes/BLOCKSIZE+1;
         }
-    
+        //marcamos como null los que bloques se van a liberar
+
     unsigned int bloquesLiberados=liberar_bloques_inodo(primerBL, &inodo);
        if (bloquesLiberados==FALLO){
             fprintf(stderr, RED"mi_truncar_f: error en liberar_bloques_inodo()\n"RESET);
