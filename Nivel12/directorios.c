@@ -1,4 +1,5 @@
 #include "directorios.h"
+
 /**
  * @brief Función que separa una cadena(que empieza por /) en dos partes,  inicial y final.
  * @param   camino    cadena a separar

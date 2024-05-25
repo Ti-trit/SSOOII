@@ -10,6 +10,7 @@ struct entrada {
 
 #define DEBUGN7 0
 #define DEBUGN9 0
+#define DEBUGN12 1
 
 // #define USARCACHE 1 //0:sin caché, 1: última L/E, 2:tabla FIFO, 3:tabla LRU
 

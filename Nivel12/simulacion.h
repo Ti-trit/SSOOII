@@ -1,10 +1,10 @@
-#include <ficheros.h>
 
-#include <time.h>
-#include <sys/types.h>
+#include <sys/wait.h>
+#include <signal.h>
+#include "directorios.h"
 
-#define NUMPROCESOS 100
-#define NUMESCRITURAS 50
+#define NUMPROCESOS 3
+#define NUMESCRITURAS 10
 #define REGMAX 500000
 
 struct REGISTRO { //sizeof(struct REGISTRO): 24 bytes
