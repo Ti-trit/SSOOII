@@ -48,8 +48,7 @@ int bmount(const char *camino){
  * @return           0 si lo ha cerrado correctamente. -1 en otro caso
 */
 int bumount() {
-        descriptor = close(descriptor);
-
+    descriptor = close(descriptor);
      deleteSem();
     //Si no se ha cerrado devuelve -1
     if (close(descriptor) == -1) {
