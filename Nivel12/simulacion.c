@@ -21,34 +21,31 @@ int main(int argc, char const *argv[]) {
         fprintf(stderr, RED "Sintaxis: ./simulacion <disco>\n" RESET);
         return FALLO;
     }
-
-    // Variables
-    const char *disco = argv[1];
-    int error;
-    const unsigned char TAM_FECHA = 4 + 2 + 2 + 2 + 2 + 2; // aaaammddhhmmss
-    const unsigned char TAM_NOMBRE_SIMUL = TAM_FECHA + 6; // simul_aaaammddhhmmss
-    const unsigned char TAM_RUTA = TAM_NOMBRE_SIMUL + 2; // /simul_aaaammddhhmmss/
-    if (bmount(disco) == FALLO) {
-        fprintf(stderr, RED "Error de montaje del dispositivo virtual\n" RESET);
+        if (bmount(argv[1]) == FALLO) {
+        fprintf(stderr, RED "Error al montar el dispositivo virtual\n" RESET);
         return FALLO;
     }
 
-    char ruta[TAM_RUTA]; 
-    char buffer_tiempo[TAM_FECHA];
-    memset(ruta, 0, TAM_RUTA);
-    memset(buffer_tiempo, 0, TAM_FECHA);
-    time_t aux_time_t = time(NULL);
-    struct tm tiempo = *localtime(&aux_time_t);
-    sprintf(buffer_tiempo, "%d%02d%02d%02d%02d%02d", tiempo.tm_year + 1900, 1 + tiempo.tm_mon, tiempo.tm_mday, tiempo.tm_hour, tiempo.tm_min, tiempo.tm_sec);
-    strcpy(ruta, "/");
-    strcat(ruta, "simul_");
-    strcat(ruta, buffer_tiempo);
-    strcat(ruta, "/");
+    int error;
+   
+    time_t aux_time = time(NULL);
+    struct tm tiempo = *localtime(&aux_time);
+    char * tiempo_buf = malloc(14);//4(year)+ 2(month)+2(day)+2(hour)+2(minut)+2(second)
+    sprintf(tiempo_buf, "%d%02d%02d%02d%02d%02d", tiempo.tm_year + 1900, 1 + tiempo.tm_mon, tiempo.tm_mday, tiempo.tm_hour, tiempo.tm_min, tiempo.tm_sec);
+   
+    char *ruta = malloc(22); //14 + 6 (/simul_)+ 1(/) --> Longitud fija para la ruta con el formato "/simul_aaaammddhhmmss/"
 
+    memset(ruta, 0, strlen(ruta));
+    strcpy(ruta, "/simul_");
+    strcat(ruta, tiempo_buf); //concatenar el tiempo
+    strcat(ruta, "/"); //simul_aaaammddhhmmss/
+
+    char buffer[80];
+     strcpy(buffer,ruta);   
     error = mi_creat(ruta, 6);
     if (error < 0) {
         if (error == FALLO) {
-            fprintf(stderr, RED "Error al crear el directorio de simulación\n" RESET);
+            fprintf(stderr, RED "simulacion.c: Error al crear el directorio de simulación\n" RESET);
         } else {
             mostrar_error_buscar_entrada(error);
             fprintf(stderr, "ERROR EN EL PRIMER CREAT\n");
@@ -56,23 +53,16 @@ int main(int argc, char const *argv[]) {
         return FALLO;
     }
     fprintf(stdout, "*** SIMULACIÓN DE %i PROCESOS REALIZANDO CADA UNO %i ESCRITURAS ***:\n", NUMPROCESOS, NUMESCRITURAS);
-    for (unsigned char proceso = 1; proceso <= NUMPROCESOS; proceso++) {
+    for (unsigned char i = 1; i <= NUMPROCESOS; i++) {
         pid_t pid = fork();
         if (pid == 0) {
-            if (bmount(disco) == FALLO) {
-                fprintf(stderr, RED "Error de montaje del dispositivo virtual\n" RESET);
+            if (bmount(argv[1]) == FALLO) {
+                fprintf(stderr, RED "Error al montar el dispositivo virtual\n" RESET);
                 exit(-1);
+                //return FALLO;
             }
-            char str_pid[10]; // 10, probablemente no necesite tantos dígitos pero mejor que sobren
-            memset(str_pid, 0, 10);
-            sprintf(str_pid, "%d", getpid());
-            unsigned char digitos_pid = strlen(str_pid);
-            char ruta_hijo[TAM_RUTA + 8 + 11 + digitos_pid]; // /simul_aaaammddhhmmss/proceso_[str_pid]/prueba.dat
-            memset(ruta_hijo, 0, TAM_RUTA + 8 + 11 + digitos_pid);
-            strcpy(ruta_hijo, ruta);
-            strcat(ruta_hijo, "proceso_");
-            strcat(ruta_hijo, str_pid);
-            strcat(ruta_hijo, "/");
+            char ruta_hijo[100]; 
+            sprintf(ruta_hijo, "%sproceso_%d/", buffer, getpid());
             error = mi_creat(ruta_hijo, 6);
             if (error < 0) {
                 if (error == FALLO) {
@@ -82,24 +72,26 @@ int main(int argc, char const *argv[]) {
                     mostrar_error_buscar_entrada(error);
                 }
                 exit(-1);
+                //return FALLO;
             }
             strcat(ruta_hijo, "prueba.dat");
             error = mi_creat(ruta_hijo, 6);//crear el fichero
             if (error < 0) {
                 if (error == FALLO) {
-                    fprintf(stderr, RED "Error al crear un prueba.dat de un proceso hijo\n" RESET);
+                    fprintf(stderr, RED "Error al crear fichero de un proceso hijo\n" RESET);
                 } else {
                     mostrar_error_buscar_entrada(error);
                 }
                 exit(-1);
+                //return FALLO;
             }
             // se consigue semilla a partir de valor aleatorio
             srand(time(NULL) + getpid());
-            for (unsigned char nescritura = 1; nescritura <= NUMESCRITURAS; nescritura++) {
+            for (unsigned char escritura = 1; escritura <= NUMESCRITURAS; escritura++) {
                 struct REGISTRO registro;
                 registro.fecha = time(NULL);
                 registro.pid = getpid();
-                registro.nEscritura = nescritura;
+                registro.nEscritura = escritura;
                 registro.nRegistro = rand()%REGMAX;
                 error = mi_write(ruta_hijo, &registro, registro.nRegistro * sizeof(struct REGISTRO), sizeof(struct REGISTRO));
                 if (error < 0) {
@@ -116,7 +108,7 @@ int main(int argc, char const *argv[]) {
                 usleep(50000);
             }
 #if DEBUGN12
-            fprintf(stderr, GRAY "[Proceso %i: Completadas %i escrituras en %s]\n" RESET, proceso, NUMESCRITURAS, ruta_hijo);
+            fprintf(stderr, GRAY "[Proceso %i: Completadas %i escrituras en %s]\n" RESET, i, NUMESCRITURAS, ruta_hijo);
 #endif
             if (bumount() == FALLO) {
                 fprintf(stderr, RED "Error al desmontar el dispositivo virtual.\n" RESET);
@@ -138,4 +130,5 @@ int main(int argc, char const *argv[]) {
 
     return EXITO;
 }
+
 
