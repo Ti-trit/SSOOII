@@ -46,13 +46,13 @@ int main(int argc, char *argv[]) {
     struct stat st;
     if (stat(directorioSimulacion, &st) == -1) {
         perror("Error al obtener información del directorio de simulación");
-        return 1;
+        return FALLO;
     }
 
     int numentradas = st.st_nlink - 2; // Restar 2 para . y ..
     if (numentradas != NUMPROCESOS) {
         fprintf(stderr, "ERROR: El número de entradas del directorio (%d) no es igual a NUMPROCESOS (%d)\n", numentradas, NUMPROCESOS);
-        return 1;
+        return FALLO;
     }
 
     char informePath[256];
@@ -60,14 +60,14 @@ int main(int argc, char *argv[]) {
     FILE *informe = fopen(informePath, "w");
     if (!informe) {
         perror("Error al crear el archivo informe.txt");
-        return 1;
+        return FALLO;
     }
 
     struct dirent *entry;
     DIR *dp = opendir(directorioSimulacion);
     if (!dp) {
         perror("Error al abrir el directorio de simulación");
-        return 1;
+        return FALLO;
     }
 
     while ((entry = readdir(dp))) {
@@ -135,7 +135,7 @@ int main(int argc, char *argv[]) {
     // Desmontar el dispositivo virtual (esto también dependerá de su implementación)
     if (umount(directorioSimulacion) == -1) {
         perror("Error al desmontar el dispositivo");
-        return 1;
+        return FALLO;
     }
 
     return 0;
