@@ -36,10 +36,11 @@ int main(int argc, char *argv[]) {
     char *nombreDispositivo = argv[1];
     char *directorioSimulacion = argv[2];
 
-    // Montar el dispositivo virtual (esto dependerá de su implementación)
-    if (mount(nombreDispositivo, directorioSimulacion, "ext4", 0, NULL) == -1) {
-        perror("Error al montar el dispositivo");
-        return 1;
+    //montar el dispositivo virtual
+    if (bmount(argv[1]) == FALLO)
+    {
+        fprintf(stderr, RED "Error al montar el dispositivo\n" RESET);
+        return FALLO;
     }
 
     struct stat st;
