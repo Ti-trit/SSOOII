@@ -132,9 +132,9 @@ int main(int argc, char *argv[]) {
     closedir(dp);
     fclose(informe);
 
-    // Desmontar el dispositivo virtual (esto también dependerá de su implementación)
-    if (umount(directorioSimulacion) == -1) {
-        perror("Error al desmontar el dispositivo");
+    // Desmontar el dispositivo virtual
+    if (bumount() == FALLO) {
+        fprintf(stderr, RED"Error al desmontar el dispositivo.\n"RESET);
         return FALLO;
     }
 
