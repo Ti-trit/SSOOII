@@ -17,11 +17,13 @@ static int descriptor = 0;
  * 
 */
 int bmount(const char *camino){
-
+ if (descriptor > 0) {
+        close(descriptor);
+    }
        if (!mutex) { // el semáforo es único en el sistema y sólo se ha de inicializar 1 vez (padre)
        mutex = initSem(); 
        if (mutex == SEM_FAILED) {
-           return -1;
+           return FALLO;
        }
    }
 
@@ -46,6 +48,7 @@ int bmount(const char *camino){
  * @return           0 si lo ha cerrado correctamente. -1 en otro caso
 */
 int bumount() {
+    descriptor = close(descriptor);
      deleteSem();
     //Si no se ha cerrado devuelve -1
     if (close(descriptor) == -1) {
@@ -124,4 +127,3 @@ void mi_signalSem() {
        signalSem(mutex);
    }
 }
-
