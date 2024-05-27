@@ -108,7 +108,7 @@ int main(int argc, char const *argv[]) {
                 usleep(50000);
             }
 #if DEBUGN12
-            fprintf(stderr, GRAY "[Proceso %i: Completadas %i escrituras en %s]\n" RESET, i, NUMESCRITURAS, ruta_hijo);
+            fprintf(stderr, BLUE "[Proceso %i: Completadas %i escrituras en %s]\n" RESET, i, NUMESCRITURAS, ruta_hijo);
 #endif
             if (bumount() == FALLO) {
                 fprintf(stderr, RED "Error al desmontar el dispositivo virtual.\n" RESET);

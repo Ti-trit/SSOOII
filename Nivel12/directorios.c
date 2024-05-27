@@ -116,7 +116,7 @@ int buscar_entrada(const char *camino_parcial, unsigned int *p_inodo_dir, unsign
     }
     memset(inicial, 0, sizeof(inicial)); //?
     memset(final, 0, strlen(camino_parcial));
-   // memset(entrada.nombre, 0, sizeof(entrada.nombre));
+    memset(entrada.nombre, 0, sizeof(entrada.nombre));
 
     if (extraer_camino(camino_parcial, inicial, final, &tipo) < 0)
     {
@@ -144,7 +144,7 @@ int buscar_entrada(const char *camino_parcial, unsigned int *p_inodo_dir, unsign
     cant_entradas_inodo = inodo_dir.tamEnBytesLog / sizeof(struct entrada);
     struct entrada bufferEntradas[cant_entradas_inodo+1];
     num_entrada_inodo = 0; // nº de entrada inicial
-   // struct entrada bufferEntradas[BLOCKSIZE / sizeof(entrada)];
+    //struct entrada bufferEntradas[BLOCKSIZE / sizeof(entrada)];
 // inicializar el bufferEntradas de lectura con 0s
     if (memset(&bufferEntradas, 0, (cant_entradas_inodo+1) * sizeof(struct entrada))== NULL){
         fprintf(stderr, RED "buscar_entrada: Error en el memset()\n" RESET);
