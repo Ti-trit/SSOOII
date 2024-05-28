@@ -1,8 +1,3 @@
-/*
-Autores: Khaoula Ikkene, Tomás Gallardo Rago, Francesc Gayá Piña  
-Grupo: AntiLinux
-
-*/
 #include "bloques.h"
 #include <time.h>
 #include <limits.h>
@@ -19,8 +14,8 @@ Grupo: AntiLinux
 #define DEBUGN2   0
 #define DEBUGN3   0
 #define DEBUGN4   0
-#define DEBUGN5   1
-#define DEBUGN6   1
+#define DEBUGN5   0
+#define DEBUGN6   0
 //Metodos
 
 

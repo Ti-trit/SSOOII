@@ -1,9 +1,5 @@
 // bloques.h
-/*
-Autores: Khaoula Ikkene, Tomás Gallardo Rago, Francesc Gayá Piña  
-Grupo: AntiLinux
 
-*/
 
 #include <stdio.h>  //printf(), fprintf(), stderr, stdout, stdin
 #include <fcntl.h> //O_WRONLY, O_CREAT, O_TRUNC
@@ -43,3 +39,9 @@ int bmount(const char *camino);
 int bumount();
 int bwrite(unsigned int nbloque, const void *buf);
 int bread(unsigned int nbloque, void *buf);
+
+//Funcions del nivel 11
+void mi_signalSem();
+void mi_waitSem();
+
+

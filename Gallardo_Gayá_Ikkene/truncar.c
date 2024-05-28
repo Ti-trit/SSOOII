@@ -1,9 +1,5 @@
-/*
-Autores: Khaoula Ikkene, Tomás Gallardo Rago, Francesc Gayá Piña  
-Grupo: AntiLinux
-
-*/
 #include "ficheros.h"
+
 
 int main(int argc, char const *argv[]) {
 

@@ -1,16 +1,11 @@
-/*
-Autores: Khaoula Ikkene, Tomás Gallardo Rago, Francesc Gayá Piña  
-Grupo: AntiLinux
-
-*/
-#include "ficheros.h"
+#include "directorios.h"
 
 #define tambuffer 1500 //Tamaño del buffer de lectura
 
 int main(int argc, char const *argv[]) {
 
     if (argc!=3){
-        fprintf(stderr, RED "Sintaxis: ./leer <nombre_dispositivo> <ninodo>\n"RESET);
+        fprintf(stderr, RED "Sintaxis: permitir <nombre_dispositivo> <ninodo>\n"RESET);
         return FALLO;
     }
 

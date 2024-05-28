@@ -1,9 +1,5 @@
-/*
-Autores: Khaoula Ikkene, Tomás Gallardo Rago, Francesc Gayá Piña  
-Grupo: AntiLinux
+#include "directorios.h"
 
-*/
-#include "ficheros.h"
 
 int main(int argc, char *argv[]){
 
@@ -14,7 +10,7 @@ int main(int argc, char *argv[]){
     }
     // const char dispositivo = argv[1];
     int ninodo = atoi(argv[2]);
-     char permisos = atoi(argv[3]);
+     unsigned char permisos = atoi(argv[3]);
 
     //montar el dispositivo
 

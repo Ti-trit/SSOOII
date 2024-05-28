@@ -1,8 +1,4 @@
-/*
-Autores: Khaoula Ikkene, Tomás Gallardo Rago, Francesc Gayá Piña  
-Grupo: AntiLinux
 
-*/
 
 #include <stdio.h>
 #include "ficheros.h"
