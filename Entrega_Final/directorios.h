@@ -12,32 +12,37 @@ struct entrada {
 #define DEBUGN9 0
 #define DEBUGN12 1
 
-// #define USARCACHE 1 //0:sin caché, 1: última L/E, 2:tabla FIFO, 3:tabla LRU
+
+
+
+#define USARCACHE 2 //0:sin caché, 1: última L/E, 2:tabla FIFO, 3:tabla LRU
 
 #define PROFUNDIDAD 32 //profundidad máxima del árbol de directorios
-// #define CACHE_SIZE 3
 
 struct UltimaEntrada{
    char camino [TAMNOMBRE*PROFUNDIDAD];
    int p_inodo;
 
-  // #if USARCACHE==3 // tabla LRU
-  //     struct timeval ultima_consulta;
-  // #endif
-  // #if USARCACHE==2
-  // int ultima_insercion;
-  // #endif
+  #if USARCACHE==3 // tabla LRU
+      struct timeval ultima_consulta;
+  #endif
+  #if USARCACHE==2
+  int ultima_insercion;
+  #endif
+
 
 };
 
-
-// //tabla caché directorios
-// #if (USARCACHE==2 || USARCACHE==3)
-//    #define CACHE_SIZE 3 // cantidad de entradas para la caché
-//    static struct UltimaEntrada UltimasEntradas[CACHE_SIZE];
-//      int ultima_insercion;
-
+// #if USARCACHE==1//ultima L/E
+// struct UltimaEntrada UltimaEntradaEscritura;
 // #endif
+
+//tabla caché directorios
+#if (USARCACHE==2 || USARCACHE==3)
+   #define CACHE_SIZE 3 // cantidad de entradas para la caché
+//struct UltimaEntrada UltimasEntradas[CACHE_SIZE];//se declara en directorios.c 
+
+#endif
 
 
 //errores
