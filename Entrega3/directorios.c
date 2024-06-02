@@ -919,7 +919,6 @@ int mi_write(const char *camino, const void *buf, unsigned int offset, unsigned 
 {
 
     // primero buscaremos la entrada
-
     unsigned int p_inodo_dir = 0, p_inodo = 0, p_entrada = 0;
 
 // Sin caché
@@ -1017,6 +1016,7 @@ int mi_write(const char *camino, const void *buf, unsigned int offset, unsigned 
             fprintf(stderr, YELLOW "\n[mi_write() → Utilizamos la caché de escritura en vez de llamar a buscar_entrada()]\n" RESET);
             #endif
             UltimasEntradas[index].ultima_consulta=momento_actual;//actualizamos el tiempo de referencia
+            
             break;
         }
         index++;

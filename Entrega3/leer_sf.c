@@ -260,15 +260,6 @@ int main(int argc, char **argv){
     }
      #endif
 
-  /*char *caminos[] = {"pruebas/","/pruebas/" , "/pruebas/docs/", "/pruebas/", "/pruebas/docs/", "/pruebas/docs/doc1", "/pruebas/docs/doc1/doc11", "/pruebas/", "/pruebas/docs/doc1", "/pruebas/docs/doc1", "/pruebas/casos/", "/pruebas/docs/doc2"};
-  for (unsigned int i =0; i<sizeof(caminos); i++){
-    int reservar =1;
-    if (i==1 || i == 9){
-      reservar = 0;
-    }
-    mostrar_buscar_entrada(caminos[i], reservar);
-  }*/
-
      
    #if DEBUGN7  
  

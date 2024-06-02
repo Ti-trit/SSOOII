@@ -1,7 +1,7 @@
 #include "directorios.h"
 
 /**
- * Programa que cambia los permisos de un fichero/directorio, llamando a la función mi_chmod().
+ * Programa que cambia los permisos de un fichero/directorio.
  * 
 */
 
@@ -12,9 +12,6 @@ int main (int argc, char ** argv){
     }
 
     //comprobamos que los permisos son correctos
-
-    //los permisos se indican en octal
-
     unsigned char permisos = atoi(argv[2]);
     if (permisos<0 || permisos >7){
 
@@ -22,7 +19,7 @@ int main (int argc, char ** argv){
         return FALLO;
     }
 
- // Montar  del dispositivo virtual
+ // Montar el dispositivo virtual
     if (bmount(argv[1]) == FALLO) {
         fprintf(stderr, RED "mi_chmod.c: Error al montar el dispositivo\n" RESET);
         return FALLO;
@@ -32,7 +29,6 @@ int main (int argc, char ** argv){
         mostrar_error_buscar_entrada(error);
         return FALLO;
     }
-
 
 if (bumount() == FALLO){
         fprintf(stderr, RED "mi_chmod.c: Error al desmontar el dispositivo\n" RESET);

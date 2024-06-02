@@ -46,11 +46,9 @@ int main(int argc, char const *argv[]) {
     ts = localtime(&p_stat.atime);
     strftime(atime, sizeof(atime), "%a %Y-%m-%d %H:%M:%S", ts);
 
-    //  tiempo de última modificación 
     ts = localtime(&p_stat.mtime);
     strftime(mtime, sizeof(mtime), "%a %Y-%m-%d %H:%M:%S", ts);
 
-    // tiempo de cambio del estado del pstat
     ts = localtime(&p_stat.ctime);
     strftime(ctime, sizeof(ctime), "%a %Y-%m-%d %H:%M:%S", ts);
 

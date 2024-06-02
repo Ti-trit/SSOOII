@@ -14,7 +14,7 @@ int main(int argc, char **argv){
     char * ruta_fichero_original = argv[2];
     char * ruta_enlace = argv[3];
 
-   // si las rutas son directorios error
+   // si las rutas son de directorios--> devolver error
     if (ruta_fichero_original[strlen(ruta_fichero_original) - 1] == '/' || ruta_enlace[strlen(ruta_enlace) - 1] == '/') {
         fprintf(stderr, RED "Las rutas deben corresponder a ficheros!\n" RESET);
         return FALLO;
@@ -24,6 +24,7 @@ int main(int argc, char **argv){
           fprintf(stderr, RED "mi_link.c: Error al montar el disco\n"RESET);
         return FALLO;
     }
+    //enlazar los dos ficheros
     int error = mi_link(argv[2], argv[3]);
     if (error < 0) {
         mostrar_error_buscar_entrada(error);

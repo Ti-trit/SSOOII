@@ -15,7 +15,7 @@ int main(int argc, char *argv[]){
     //montar el dispositivo
 
     if (bmount(argv[1])==FALLO){
-          fprintf(stderr, RED "Se ha producido un error al montar el dispositivo.\n"RESET);
+          fprintf(stderr, RED "permitir.c: Se ha producido un error al montar el dispositivo.\n"RESET);
             return FALLO;
     }
 
@@ -26,9 +26,8 @@ int main(int argc, char *argv[]){
     }
 
     //desmontar el dispositivo
-
     if (bumount(argv[1])==FALLO){
-         fprintf(stderr, RED"Error al desmontar el dispositivo.\n" RESET);
+         fprintf(stderr, RED"permitir.c: Error al desmontar el dispositivo.\n" RESET);
     return FALLO;
     }
     return EXITO;

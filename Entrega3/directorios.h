@@ -15,7 +15,7 @@ struct entrada {
 
 
 
-#define USARCACHE 2 //0:sin caché, 1: última L/E, 2:tabla FIFO, 3:tabla LRU
+#define USARCACHE 3 //0:sin caché, 1: última L/E, 2:tabla FIFO, 3:tabla LRU
 
 #define PROFUNDIDAD 32 //profundidad máxima del árbol de directorios
 

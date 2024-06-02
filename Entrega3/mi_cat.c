@@ -2,7 +2,7 @@
 
 #define tambuffer 1500
 /**
- * Programa que muestra todo el contenido de uun fichero
+ * Programa que muestra todo el contenido de un fichero
 */
 int main(int argc, char const *argv[]){
     if(argc != 3){
@@ -11,7 +11,7 @@ int main(int argc, char const *argv[]){
     }
 
 
-     char *ruta = (char*)argv[2];
+    char *ruta = (char*)argv[2];
    int offset=0, bytes_leidos = 0;
     char buffer[tambuffer];
     memset(buffer, 0, tambuffer);
@@ -28,11 +28,10 @@ int main(int argc, char const *argv[]){
     while (leidos_aux > 0){ 
         bytes_leidos += leidos_aux;
         if(write(1, buffer, leidos_aux) < 0){
-          //  mostrar_error_buscar_entrada(bytes_leidos);
             return FALLO;
         }
-        memset(buffer, 0, tambuffer);
-        offset += tambuffer;
+        memset(buffer, 0, tambuffer);//para las nuevas lecturas
+        offset += tambuffer;//actualizamos el offset
         leidos_aux = mi_read(ruta, buffer, offset, tambuffer);
     }
     if (leidos_aux < 0) {

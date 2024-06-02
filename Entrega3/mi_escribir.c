@@ -14,7 +14,6 @@ int main(int argc, char const *argv[]){
     const char *ruta = (char*)argv[2];
     const unsigned int offset = atoi(argv[4]);
 
-   
 
     // Si es un directorio error, no se puede escribir en ello
     if ((ruta[strlen(ruta) - 1]) == '/') {

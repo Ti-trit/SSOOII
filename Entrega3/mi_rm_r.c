@@ -25,7 +25,6 @@ if (ruta[strlen(ruta)-1]!='/'){//es un fichero
     
 }
     if (mi_rm_r(argv[2])<0){
-     //   perror("Error");
         return FALLO;
     }
 

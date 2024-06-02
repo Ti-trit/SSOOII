@@ -1,9 +1,7 @@
 
 #include "verificacion.h"
 
-
-
-// Función para convertir el tiempo en una cadena legible
+// Función auxiliar para convertir el tiempo en una cadena legible
 char *formatearTiempo(time_t tiempo)
 {
     static char buffer[80];
@@ -12,16 +10,15 @@ char *formatearTiempo(time_t tiempo)
     return buffer;
 }
 
-// Función principal
 int main(int argc, char *argv[])
 {
+    //comprobamos la sintaxis
     if (argc != 3)
     {
         fprintf(stderr, RED "Uso: %s <nombre_dispositivo> <directorio_simulación>\n" RESET, argv[0]);
         return FALLO;
     }
 
-    //  char *nombreDispositivo = argv[1];
     char *directorioSimulacion = argv[2];
 
     // montar el dispositivo virtual
@@ -82,24 +79,22 @@ int main(int argc, char *argv[])
         // nombre del fichero es PID+preuba.dat
         sprintf(rutaPrueba, "%s%s/prueba.dat", directorioSimulacion, Nombreentrada);
         // fprintf(stdout, "fichero hijo %s\n", rutaPrueba);
-
-        int cant_registros_buffer_escrituras = 256*24, offset = 0;
+        //la cant_registros_buffer_escrituras debe ser multiplo de BLOCKSIZE
+        int cant_registros_buffer_escrituras = 256*24, offset = 0; 
         struct REGISTRO buffer_escrituras[cant_registros_buffer_escrituras];
         memset(buffer_escrituras, 0, sizeof(buffer_escrituras));
         while (mi_read(rutaPrueba, buffer_escrituras, offset, sizeof(buffer_escrituras)) > 0)
         {
             // leer una escritura
-
             for (int i = 0; i < cant_registros_buffer_escrituras; i++)
             {
                 // la escritura e valida?
                 if (buffer_escrituras[i].pid == info.pid){ // para no leer basura
                         
-
                     // es la primera escritura valida?
                     if (info.nEscrituras == 0)
                     {
-                        // Inicializar los registros significativos con los datos de esa escritura.
+                        // Inicializar los registros significativos con los datos de esa escritura
                         info.MayorPosicion = buffer_escrituras[i];
                         info.UltimaEscritura = buffer_escrituras[i];
                         info.MenorPosicion = buffer_escrituras[i];
@@ -110,28 +105,28 @@ int main(int argc, char *argv[])
                     {
                         // Comparar nº de escritura (para obtener primera y última) y actualizarlas si es preciso
                     if (buffer_escrituras[i].nEscritura > info.UltimaEscritura.nEscritura){//Última escritura: registro con el nº de escritura mayor
-                        info.UltimaEscritura = buffer_escrituras[i];}
+                        info.UltimaEscritura = buffer_escrituras[i];
+                        }
                     if (buffer_escrituras[i].nEscritura < info.PrimeraEscritura.nEscritura){//Primera escritura: registro con el nº de escritura menor
-                        info.PrimeraEscritura = buffer_escrituras[i];}
+                        info.PrimeraEscritura = buffer_escrituras[i];
+                        }
                         if (buffer_escrituras[i].nRegistro < info.MenorPosicion.nRegistro){//Menor posición: registro con la posición (nº registro) más baja
-                        info.MenorPosicion = buffer_escrituras[i];}
+                        info.MenorPosicion = buffer_escrituras[i];
+                        }
                     if (buffer_escrituras[i].nRegistro > info.MayorPosicion.nRegistro){//Mayor posición: registro con la posición (nº registro) más alta
-                        info.MayorPosicion = buffer_escrituras[i];}
+                        info.MayorPosicion = buffer_escrituras[i];
+                        }
                         }
                          // incrementar nº escrituras validas
                 info.nEscrituras++;
                 }
                
             }
-         //   }
             memset(&buffer_escrituras, 0, sizeof(buffer_escrituras));
             offset += sizeof(buffer_escrituras); // actualizar el offset en cada iteración
         }
 
-
-
-
-        // guardar la informacion de las escituras en el fichero
+  // guardar la informacion de las escituras en el fichero
 
         char tiempoPrimero[80], tiempoUltimo[80],  tiempoMenor[80], tiempoMayor[80];
 
@@ -185,4 +180,3 @@ if (bumount() == FALLO)
 
 return EXITO;
 }
-

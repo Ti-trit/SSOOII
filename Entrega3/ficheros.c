@@ -13,6 +13,7 @@
 
 int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offset, unsigned int nbytes)
 {
+    //Declaración y inicialización de varialbles
     unsigned int primerBL = offset / BLOCKSIZE;
     unsigned int ultimoBL = (offset + nbytes - 1) / BLOCKSIZE;
 
@@ -21,22 +22,21 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
     char unsigned buf_bloque[BLOCKSIZE];
 
     int bytesEscritos = 0, auxBytesEscritos = 0;
-    mi_waitSem();
+    mi_waitSem();//porque accedimos al inodo
     struct inodo inodo;
     if (leer_inodo(ninodo, &inodo) == FALLO)
     {
         fprintf(stderr, RED "mi_write_f: Error al leer el inodo\n" RESET);
         return FALLO;
     }
-    // Verificamos que tenemos permisos de escritura
+    //Tenemos permisos de escritura?
     if ((inodo.permisos & 2) != 2)
-    {
+    {//NO
         fprintf(stderr, RED "mi_write_f: No hay permisos de escritura\n" RESET);
         return FALLO;
     }
-
+    //Obtener el bloque físico    
     unsigned int nbfisico = traducir_bloque_inodo(&inodo, primerBL, 1);
-    // mi_signalSem();
     if (nbfisico == FALLO)
     {
         fprintf(stderr, RED "mi_write_f: Error en traducir_bloque_inodo().\n" RESET);
@@ -126,6 +126,7 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
             mi_signalSem();
             return FALLO;
         }
+        //copiamos el contenido en el buffer
         if (memcpy(buf_bloque, buf_original + (nbytes - desp2 - 1), desp2 + 1) == NULL)
         {
             fprintf(stderr, RED "mi_write_f: Error\n" RESET);
@@ -142,15 +143,8 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
         bytesEscritos += desp2 + 1;
     }
 
-    // actaulizamos los datos del inodo si hemos escrito más allá del final del fichero
+    // actaulizamos el inodo si hemos escrito más allá del eof
 
-    // leemos de nuveo el inodo por si traducir_bloque_inodo hizo cambios
-    // mi_waitSem();
-    // if (leer_inodo(ninodo, &inodo) == FALLO)
-    // {
-    //     mi_signalSem();
-    //     return FALLO;
-    // }
     if ((offset + nbytes) > inodo.tamEnBytesLog)
     {
         inodo.tamEnBytesLog = nbytes + offset;
@@ -186,7 +180,7 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
         mi_signalSem();
         return FALLO;
     }
-    // Comprobamos si tenemos permisos de escritura
+    // Tenemos permisos de escritura?
     if ((inodo.permisos & 4) != 4)
     {
         fprintf(stderr, RED "mi_read_f: No hay permisos de lectura\n" RESET);
@@ -205,8 +199,9 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
     {
         // pretende leer más allá de EOF
         nbytes = inodo.tamEnBytesLog - offset;
-        // leemos sólo los bytes que podemos desde el offset hasta EOF
+        //leemos sólo los bytes que podemos desde el offset hasta EOF
     }
+
     char unsigned buf_bloque[BLOCKSIZE];
     unsigned int primerBL = offset / BLOCKSIZE;
     unsigned int ultimoBL = (offset + nbytes - 1) / BLOCKSIZE;
@@ -242,7 +237,7 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
     bytesLeidos = bytesPrimerBl;
     // cuando hay que leer más de un bloque
     if (primerBL < ultimoBL)
-    {
+    {//bloques completos intermedios
         for (int bloque = 1 + primerBL; bloque < ultimoBL; bloque++)
         {
             nbfisico = traducir_bloque_inodo(&inodo, bloque, 0);
@@ -288,7 +283,7 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
         return FALLO;
     }
     if ((offset + nbytes) > inodo.tamEnBytesLog)
-    { // si hemos escrito más allá del final del fichero (bytesLeidos > inodo.tamEnBytesLog) ???
+    { // si hemos escrito más allá del final del fichero
         inodo.tamEnBytesLog = nbytes + offset;
         inodo.ctime = time(NULL);
     }
@@ -303,6 +298,7 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
     }
 
     mi_signalSem();
+    //devolvemos los bytes realmente leidos.
     return nbytes == bytesLeidos ? bytesLeidos : FALLO;
 }
 
@@ -310,7 +306,7 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
  * Devuelve la metainformación de un fichero/directorio correspondiente
  * al inodo pasado.
  * @param   ninodo  posición del inodo en el AI
- * @param   p_stat  strcut semejante al inodo pero sin los puntero ni el padding
+ * @param   p_stat  strcut semejante al inodo pero sin los punteros ni el padding
  */
 int mi_stat_f(unsigned int ninodo, struct STAT *p_stat)
 {
@@ -332,8 +328,9 @@ int mi_stat_f(unsigned int ninodo, struct STAT *p_stat)
     p_stat->permisos = inodo.permisos;
     p_stat->tamEnBytesLog = inodo.tamEnBytesLog;
     p_stat->numBloquesOcupados = inodo.numBloquesOcupados;
-
-    // printf ("%s %s %i %i %t %i", p_stat->tipo, p_stat->permisos, p_stat->nlinks, p_stat->tamEnBytesLog, p_stat->atime, p_stat->numBloquesOcupados);
+        #if DEBUGN5
+     printf ("%s %s %i %i %t %i", p_stat->tipo, p_stat->permisos, p_stat->nlinks, p_stat->tamEnBytesLog, p_stat->atime, p_stat->numBloquesOcupados);
+    #endif
     return EXITO;
 }
 
@@ -370,6 +367,7 @@ int mi_chmod_f(unsigned int ninodo, unsigned char permisos)
     return EXITO;
 }
 
+
 int mi_truncar_f(unsigned int ninodo, unsigned int nbytes)
 {
 
@@ -379,7 +377,7 @@ int mi_truncar_f(unsigned int ninodo, unsigned int nbytes)
         fprintf(stderr, RED "mi_truncar_f: Error al leer el inodo\n" RESET);
         return FALLO;
     }
-    // Verificamos que tenemos permisos de escritura
+    // Tenemos permisos de escritura?
     if ((inodo.permisos & 2) != 2)
     {
         fprintf(stderr, RED "mi_truncar_f: No hay permisos de escritura\n" RESET);
@@ -401,7 +399,6 @@ int mi_truncar_f(unsigned int ninodo, unsigned int nbytes)
     {
         primerBL = nbytes / BLOCKSIZE + 1;
     }
-    // marcamos como null los que bloques se van a liberar
 
     unsigned int bloquesLiberados = liberar_bloques_inodo(primerBL, &inodo);
     if (bloquesLiberados == FALLO)

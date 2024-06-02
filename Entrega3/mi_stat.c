@@ -1,7 +1,7 @@
 #include "directorios.h"
 
 int main(int argc, char const *argv[]) {
-    // Comprobar argumentos
+    // Comprobar sintaxis
     if (argc != 3) {
         fprintf(stderr, "Sintaxis: %s <disco> </ruta>\n", argv[0]);
         return FALLO;

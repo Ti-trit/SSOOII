@@ -4,6 +4,7 @@
 
 unsigned char acabados = 0;
 
+//enterrador de procesos hijos
 void reaper() {
     pid_t ended;
     signal(SIGCHLD, reaper);
@@ -16,7 +17,7 @@ int main(int argc, char const *argv[]) {
     //Asociar sigchld al reaper()
     signal(SIGCHLD, reaper);
 
-    // Comprueba que la sintaxis sea correcta.
+    // Comprobamos la sintaxis
     if (argc != 2) {
         fprintf(stderr, RED "Sintaxis: ./simulacion <disco>\n" RESET);
         return FALLO;
@@ -41,14 +42,14 @@ int main(int argc, char const *argv[]) {
     strcat(ruta, "/"); //simul_aaaammddhhmmss/
 
     char buffer[80];
-     strcpy(buffer,ruta);   
+    strcpy(buffer,ruta);   
     error = mi_creat(ruta, 6);
     if (error < 0) {
         if (error == FALLO) {
             fprintf(stderr, RED "simulacion.c: Error al crear el directorio de simulación\n" RESET);
         } else {
             mostrar_error_buscar_entrada(error);
-            fprintf(stderr, "ERROR EN EL PRIMER CREAT\n");
+           // fprintf(stderr, "ERROR EN EL PRIMER CREAT\n");
         }
         return FALLO;
     }
@@ -75,7 +76,7 @@ int main(int argc, char const *argv[]) {
                 //return FALLO;
             }
             strcat(ruta_hijo, "prueba.dat");
-            error = mi_creat(ruta_hijo, 6);//crear el fichero
+            error = mi_creat(ruta_hijo, 6);//crear el fichero con permisos de lectura y escritura
             if (error < 0) {
                 if (error == FALLO) {
                     fprintf(stderr, RED "Error al crear fichero de un proceso hijo\n" RESET);

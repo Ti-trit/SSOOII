@@ -16,13 +16,10 @@ int main (int argc, char ** argv){
         return FALLO;
     }
     //montar el disco
-
     if (bmount(argv[1])==FALLO){
         fprintf(stderr, RED "mi_rm.c: Error al montar el disco\n"RESET);
         return FALLO;
     }
-
-   
 
         int error = mi_unlink(ruta);
     if (error<0) {

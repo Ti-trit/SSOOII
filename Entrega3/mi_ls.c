@@ -73,7 +73,6 @@ if (tipo == 'f') {
      if (formato != 0 && tipo == 'd' && numEntradas!=-1) {
         fprintf(stdout, "Total: %d\n",numEntradas);
     }
-   // fprintf(stdout, BLUE "total entradas de %s es : %i\n"RESET, argv[2], numEntradas);
     if (numEntradas < 0) {
         mostrar_error_buscar_entrada(numEntradas);
         return FALLO;
@@ -90,9 +89,7 @@ if (tipo == 'f') {
     }
             fprintf(stdout, RESET "\n");
         } else {//formato expandido
-            // if (tipo == 'd') {//solo imprimos el total en caso de directorios
-            //     fprintf(stdout, "Total: %d\n",numEntradas);
-            // }
+           
             fprintf(stdout, "Tipo\tModo\tmTime\t\t\tTamaño\tNombre\n--------------------------------------------------------------------------------\n%s\n", buff);
         }
     }

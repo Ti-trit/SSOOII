@@ -39,7 +39,7 @@ int nbloques = atoi(argv[2]);
     memset(buf, 0, BLOCKSIZE);
     //Escritura en el dispositivo
   for (int i = 0; i<nbloques; i++){
-   if ( bwrite(i, buf)<0){
+   if (bwrite(i, buf)<0){
     fprintf(stderr, RED"Error al escribir en el bloque %i\n."RESET, i);
     return FALLO;
    }
@@ -66,7 +66,7 @@ int nbloques = atoi(argv[2]);
   }
 
   //desmontar el dispositivo virtual
-  if (bumount(camino)<0){
+  if (bumount()<0){
 
     fprintf(stderr, RED"Error al desmontar el dispositivo.\n" RESET);
     return FALLO;

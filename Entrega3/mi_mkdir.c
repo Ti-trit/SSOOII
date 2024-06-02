@@ -10,8 +10,7 @@ int main (int argc, char *argv[]){
         return FALLO;
     }
    
-
-    //comprobar si termina en '/'
+   //La ruta es de un directorio?
     char * camino = argv[3];
     if (camino[strlen(camino) - 1] != '/') {
         fprintf(stderr, RED"La ruta no termina en '/'\n"RESET);
