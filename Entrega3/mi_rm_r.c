@@ -1,3 +1,6 @@
+/**
+* @authors Khaoula Ikkene, Francesc Gayá Piña
+**/
 #include "directorios.h"
 /**
  * Programa que borra todo el contenido de un directorio no vacío de forma recursiva.

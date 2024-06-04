@@ -156,11 +156,10 @@ int main(int argc, char *argv[])
                 info.MayorPosicion.nRegistro,
                 tiempoMayor);
 
+    #if DEBUGN13
         fprintf(stderr, GRAY "[%i) %i escrituras validadas en %s]\n" RESET, i + 1, info.nEscrituras, informePath);
-
+    #endif
     
-
-
     //  Añadir la información del struct info al fichero buffer_informe.txt por el final.
      bytes_escritos += mi_write(informePath, &buffer, bytes_escritos, strlen(buffer));
     if (bytes_escritos < 0)

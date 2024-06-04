@@ -1,16 +1,15 @@
+/**
+* @authors Khaoula Ikkene, Francesc Gayá Piña
+**/
 #include "ficheros.h"
 #include <sys/time.h>
 
 
-#define TAMNOMBRE 60 //tamaño del nombre de directorio o fichero, en Ext2 = 256
+#define TAMNOMBRE 60 
 struct entrada {
     char nombre[TAMNOMBRE];
     unsigned int ninodo;
 };
-
-#define DEBUGN7 0
-#define DEBUGN9 0
-#define DEBUGN12 1
 
 
 
@@ -33,14 +32,9 @@ struct UltimaEntrada{
 
 };
 
-// #if USARCACHE==1//ultima L/E
-// struct UltimaEntrada UltimaEntradaEscritura;
-// #endif
-
 //tabla caché directorios
 #if (USARCACHE==2 || USARCACHE==3)
    #define CACHE_SIZE 3 // cantidad de entradas para la caché
-//struct UltimaEntrada UltimasEntradas[CACHE_SIZE];//se declara en directorios.c 
 
 #endif
 

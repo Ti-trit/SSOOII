@@ -1,5 +1,7 @@
 
-
+/**
+* @authors Khaoula Ikkene, Francesc Gayá Piña
+**/
 #include "simulacion.h"
 
 unsigned char acabados = 0;
@@ -103,12 +105,12 @@ int main(int argc, char const *argv[]) {
                     }
                     exit(-1);
                 }
-#if DEBUGSIMUL
-                fprintf(stderr, GRAY "[simulación.c → Escritura %i en %s]\n" RESET, nescritura, ruta_hijo);
+#if DEBUGN12 
+                fprintf(stderr, GRAY "[simulación.c → Escritura %i en %s]\n" RESET, i, ruta_hijo);
 #endif
                 usleep(50000);
             }
-#if DEBUGN12
+#if DEBUGN12 
             fprintf(stderr, BLUE "[Proceso %i: Completadas %i escrituras en %s]\n" RESET, i, NUMESCRITURAS, ruta_hijo);
 #endif
             if (bumount() == FALLO) {

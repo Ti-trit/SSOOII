@@ -1,3 +1,6 @@
+/**
+* @authors Khaoula Ikkene, Francesc Gayá Piña
+**/
 #include "directorios.h"
         
 void mostrar_buscar_entrada(char *camino, char reservar){

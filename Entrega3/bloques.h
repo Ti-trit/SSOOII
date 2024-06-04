@@ -1,5 +1,7 @@
 // bloques.h
-
+/**
+* @authors Khaoula Ikkene, Francesc Gayá Piña
+**/
 
 #include <stdio.h>  //printf(), fprintf(), stderr, stdout, stdin
 #include <fcntl.h> //O_WRONLY, O_CREAT, O_TRUNC
@@ -15,7 +17,7 @@
 #define EXITO 0 //para gestión errores
 #define FALLO -1 //para gestión errores
 
-
+//COLORS
 #define BLACK   "\x1B[30m"
 #define RED     "\x1b[31m"
 #define GREEN   "\x1b[32m"
@@ -31,16 +33,16 @@
 #define GRAY    "\x1B[38;2;176;174;174m"
 #define RESET   "\x1b[0m"
 
-
+//TEXT FORMAT
 #define NEGRITA "\x1b[1m"
 
-
+//Funciones de la capa de bloques
 int bmount(const char *camino);
 int bumount();
 int bwrite(unsigned int nbloque, const void *buf);
 int bread(unsigned int nbloque, void *buf);
 
-//Funcions del nivel 11
+//Funcions del nivel 11 para la exclusión mutua
 void mi_signalSem();
 void mi_waitSem();
 

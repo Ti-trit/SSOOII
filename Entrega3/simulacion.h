@@ -1,4 +1,6 @@
-
+/**
+* @authors Khaoula Ikkene, Francesc Gayá Piña
+**/
 #include <sys/wait.h>
 #include <signal.h>
 #include "directorios.h"

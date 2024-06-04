@@ -1,4 +1,6 @@
-
+/**
+* @authors Khaoula Ikkene, Francesc Gayá Piña
+**/
 #include <stdio.h>
 #include "ficheros.h"
 

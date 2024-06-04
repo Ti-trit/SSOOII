@@ -1,13 +1,12 @@
+/**
+* @authors Khaoula Ikkene, Francesc Gayá Piña
+**/
 
 #include "bloques.h"
-
 #include "semaforo_mutex_posix.h"
-
+//Variables globales
 static sem_t *mutex;
 static unsigned int inside_sc = 0;
-
-
-//Variables globales
 static int descriptor = 0;
 
 /**
@@ -17,6 +16,7 @@ static int descriptor = 0;
  * 
 */
 int bmount(const char *camino){
+
  if (descriptor > 0) {
         close(descriptor);
     }
@@ -45,7 +45,7 @@ int bmount(const char *camino){
 
 /**
  * Desmonta el dispositivo virtual
- * @return           0 si lo ha cerrado correctamente. -1 en otro caso
+ * @return  0 si lo ha cerrado correctamente. -1 en otro caso
 */
 int bumount() {
     descriptor = close(descriptor);
@@ -92,7 +92,7 @@ if (nbytes<0){
 */
 int bread(unsigned int nbloque, void*buf){
     int pos = nbloque*BLOCKSIZE;// Posición inicial
-
+        //posicionar el puntero
     if (lseek(descriptor, pos, SEEK_SET)<0){
         fprintf(stderr, RED NEGRITA"Error al posicionar el puntero en bread().\n"RESET);
         return FALLO; // Error al posicionar el puntero
@@ -109,10 +109,7 @@ int bread(unsigned int nbloque, void*buf){
     return EXITO;
 }
 
-/**
- * 
- * 
-*/
+
 void mi_waitSem() {
    if (!inside_sc) { // inside_sc==0, no se ha hecho ya un wait
        waitSem(mutex);

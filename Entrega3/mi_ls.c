@@ -1,3 +1,6 @@
+/**
+* @authors Khaoula Ikkene, Francesc Gayá Piña
+**/
 #include "directorios.h"
 #define TAMFILA 100
 #define TAMBUFFER (TAMFILA*1000) //suponemos un máx de 1000 entradas, aunque debería ser SB.totInodos
@@ -70,7 +73,7 @@ if (tipo == 'f') {
     memset(buff, 0, TAMBUFFER);
    
     int numEntradas = mi_dir(argv[2], buff, tipo);
-     if (formato != 0 && tipo == 'd' && numEntradas!=-1) {
+     if (tipo == 'd' && numEntradas>-1) {
         fprintf(stdout, "Total: %d\n",numEntradas);
     }
     if (numEntradas < 0) {

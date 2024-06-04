@@ -1,4 +1,7 @@
  /* semaforo_mutex_posix.h */
+ /**
+* @authors Khaoula Ikkene, Francesc Gayá Piña
+**/
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <fcntl.h>

@@ -1,3 +1,6 @@
+/**
+* @authors Khaoula Ikkene, Francesc Gayá Piña
+**/
 #include "directorios.h"
 /**
  * Programa que borra un fichero , llamando a mi_unlink()

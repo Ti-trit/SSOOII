@@ -1,3 +1,6 @@
+/**
+* @authors Khaoula Ikkene, Francesc Gayá Piña
+**/
 #include "bloques.h"
 #include <time.h>
 #include <limits.h>
@@ -16,6 +19,11 @@
 #define DEBUGN4   0
 #define DEBUGN5   0
 #define DEBUGN6   0
+#define DEBUGN7   0
+#define DEBUGN8   0
+#define DEBUGN9   0
+#define DEBUGN12  0
+#define DEBUGN13  1  
 //Metodos
 
 

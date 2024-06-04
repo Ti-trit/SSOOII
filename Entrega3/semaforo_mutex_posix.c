@@ -1,4 +1,7 @@
 /* semaforo_mutex_posix.c */
+/**
+* @authors Khaoula Ikkene, Francesc Gayá Piña
+**/
 #include "semaforo_mutex_posix.h"
 
 
