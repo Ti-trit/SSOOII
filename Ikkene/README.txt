@@ -34,8 +34,7 @@ Así que la sintaxis de los programas ficticios y mi_mkfs.c quedan así:
 Mejoras realizadas ultimamente: caché de directorios, las funcionalidades extra(mi_rn, mi_cp_f, mi_cp, mi_mv), y mmap.
 En cuanto a la optimización que hice del metodo liberar_bloques_inodo no pude solucionar los errores que causaba a la hora de liberar algunos bloques.
 Por ello probé de hacer las dos mejoras de la versión iterativa compacta, y parece que tengo parte de la primera mejora. 
-Y probando con la compactación de la versión recursiva, he combinado en una sola función recrusiva la liberación de los bloques directos
-y indirectos(liberar_bloques_auxiliar). 
+Y probando con la compactación de la versión recursiva, he combinado en una sola función recrusiva la liberación de los bloques directos y indirectos(liberar_bloques_auxiliar). 
 
 
 
